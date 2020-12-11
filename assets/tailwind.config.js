@@ -7,10 +7,19 @@ module.exports = {
   ],
   darkMode: 'media', // or 'media' or 'class'
   theme: {
-    extend: {},
+    extend: {
+      gridTemplateColumns: theme => ({
+        'four-one': '4fr 1fr'
+      }),
+      fontFamily: theme => ({
+        'display': ['DM Sans', 'sans-serif']
+      }),
+    },
   },
   variants: {
     extend: {},
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/forms')
+  ]
 }

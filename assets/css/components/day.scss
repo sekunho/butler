@@ -1,0 +1,19 @@
+.day-header {
+    @apply text-center;
+
+    &__name {
+        @apply text-xs uppercase;
+
+        &--active {
+            @apply text-indigo-600;
+        }
+    }
+
+    &__number {
+        @apply text-2xl;
+
+        &--active {
+            @apply bg-indigo-600 text-white inline-block px-2 rounded-md;
+        }
+    }
+}
