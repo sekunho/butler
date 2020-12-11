@@ -61,7 +61,10 @@
             </span>
 
             <h3 class="text-3xl text-gray-800">
-              <span class="font-bold font-display">November</span> 2020
+                <span class="font-bold font-display ml-2">
+                    <%= Timex.month_name(Timex.today() |> Map.get(:month)) %>
+                </span>
+                <%= Timex.today() |> Map.get(:year) %>
             </h3>
         </div>
       </div>
@@ -100,7 +103,7 @@
     <div class="h-full flex flex-col py-6 bg-white border-l overflow-y-scroll">
         <div class="px-4 sm:px-6">
             <h2 id="slide-over-heading" class="text-lg font-medium text-gray-900">
-                Tasks
+                Todos
             </h2>
         </div>
         <div class="mt-6 relative flex-1 px-4 sm:px-6 ">
