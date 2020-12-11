@@ -1,5 +1,14 @@
 # Butler
 
+## Get started
+
+### Production
+
+```sh
+docker build -t butler .
+docker run -e DATABASE_URL=<REPLACE_WITH_DB_URL> -e SECRET_KEY_BASE=<REPLACE_WITH_SECRET_KEY> butler:latest
+```
+
 To start your Phoenix server:
 
   * Install dependencies with `mix deps.get`

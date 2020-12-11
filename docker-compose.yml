@@ -12,19 +12,5 @@ services:
       - 5432:5432
     volumes:
       - 'pgdata:/var/lib/postgresql/data'
-  # web:
-  #   build:
-  #     context: .
-  #     dockerfile: 'docker/Dockerfile.dev'
-  #   depends_on:
-  #     - db
-  #   environment:
-  #     MIX_ENV: dev
-  #   # env_file:
-  #   #   - .env
-  #   ports:
-  #     - '4000:4000'
-  #   volumes:
-  #     - .:/app
 volumes:
   pgdata:
