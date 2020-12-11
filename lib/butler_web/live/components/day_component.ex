@@ -9,7 +9,7 @@ defmodule ButlerWeb.DayComponent do
         <span class="day-header__number <%= if is_today?(@day), do: "day-header__number--active", else: "" %>"><%= get_day_num(@day) %></span>
       </div>
       <ul class="mt-4">
-        <%= if @is_disabled do %>
+        <%= if is_disabled?(@day) do %>
           <li class="bg-gray-600 opacity-10 cursor-not-allowed select-none text-white"
               style="height: calc(3.25rem * 24);">
           </li>
@@ -32,4 +32,6 @@ defmodule ButlerWeb.DayComponent do
   defp get_day_num(%Date{day: day}), do: day
 
   defp is_today?(%Date{} = date), do: date == Timex.today()
+
+  defp is_disabled?(%Date{} = date), do: not Timex.before?(Timex.today(), date)
 end
