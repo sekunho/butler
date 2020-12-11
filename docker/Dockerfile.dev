@@ -1,0 +1,15 @@
+FROM bitwalker/alpine-elixir-phoenix:1.10.3
+
+WORKDIR /app
+
+COPY mix.exs .
+COPY mix.lock .
+
+RUN mkdir assets
+
+COPY assets/package.json assets
+COPY assets/package-lock.json assets
+
+EXPOSE 4000
+
+CMD mix deps.get && cd assets && npm install && cd .. && mix phx.server
