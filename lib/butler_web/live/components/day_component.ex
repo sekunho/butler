@@ -33,5 +33,5 @@ defmodule ButlerWeb.DayComponent do
 
   defp is_today?(%Date{} = date), do: date == Timex.today()
 
-  defp is_disabled?(%Date{} = date), do: not Timex.before?(Timex.today(), date)
+  defp is_disabled?(%Date{} = date), do: Timex.before?(date, Timex.today())
 end
