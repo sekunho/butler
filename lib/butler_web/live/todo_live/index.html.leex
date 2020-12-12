@@ -7,7 +7,7 @@
     return_to: Routes.todo_index_path(@socket, :index) %>
 <% end %>
 
-<div class="flex-1 grid grid-cols-four-one">
+<div phx-window-keyup="new_todo" phx-key="n" class="flex-1 grid grid-cols-four-one">
     <div class="bg-white relative h-screen overflow-y-auto">
         <div class="bg-white w-full flex space-x-4 items-end sticky top-0 z-20 py-6 pl-6 shadow-sm">
             <div class="flex flex-col space-y-4">
@@ -113,21 +113,21 @@
         <div class="mt-6 relative flex-1 px-4 sm:px-6 ">
             <div class="absolute inset-0 px-4 sm:px-6">
                 <div class="h-full" aria-hidden="true">
-                    <button type="button" class="inline-flex mb-2 items-center justify-center w-full px-6 py-3 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <%= live_patch to: Routes.todo_index_path(@socket, :new), class: "inline-flex mb-2 items-center justify-center w-full px-6 py-3 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" do %>
                         <svg class="text-gray-500 h-5 w-5 mr-1.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         Add todo
-                    </button>
+                    <% end %>
                     <ul class="space-y-2">
                         <%= if true do %>
                             <div class="mt-24 mx-auto flex items-center justify-center h-24 w-24">
                                 <svg class="text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                             </div>
                             <div class="mt-3 text-center sm:mt-5">
-                                <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-headline">
+                                <h3 class="text-lg leading-6 font-medium text-gray-900">
                                     Empty
                                 </h3>
                                 <div class="mt-2">

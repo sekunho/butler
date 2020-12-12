@@ -1,26 +1,56 @@
-<h2><%= @title %></h2>
-
-<%= f = form_for @changeset, "#",
-  id: "todo-form",
-  phx_target: @myself,
-  phx_change: "validate",
-  phx_submit: "save" %>
-
-  <%= label f, :name %>
-  <%= text_input f, :name %>
-  <%= error_tag f, :name %>
-
-  <%= label f, :start %>
-  <%= datetime_select f, :start %>
-  <%= error_tag f, :start %>
-
-  <%= label f, :duration %>
-  <%= number_input f, :duration %>
-  <%= error_tag f, :duration %>
-
-  <%= label f, :priority %>
-  <%= text_input f, :priority %>
-  <%= error_tag f, :priority %>
-
-  <%= submit "Save", phx_disable_with: "Saving..." %>
-</form>
+<div>
+    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-indigo-100">
+        <svg class="h-6 w-6 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+    </div>
+    <div class="mt-3 sm:mt-5">
+        <h3 class="text-center text-lg leading-6 font-medium text-gray-900">
+            <%= @title %>
+        </h3>
+        <div class="mt-2">
+            <%= f = form_for @changeset, "#",
+                id: "todo-form",
+                phx_target: @myself,
+                phx_change: "validate_todo",
+                phx_submit: "save_todo" %>
+                <div class="space-y-8 divide-y divide-gray-200">
+                    <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                        <div class="sm:col-span-6">
+                            <div class="mt-1 flex rounded-md shadow-sm">
+                                <%= text_input f, :name, placeholder: "Do something", class: "flex-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full min-w-0 rounded-md sm:text-sm border-gray-300" %>
+                            </div>
+                        </div>
+                        <div class="sm:col-span-3">
+                            <label for="country" class="block text-sm font-medium text-gray-700">
+                                Priority
+                            </label>
+                            <div class="mt-1">
+                                <%= select f, :priority, list_priorities(), class: "shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" %>
+                            </div>
+                        </div>
+                        <div class="sm:col-span-3">
+                            <label for="last_name" class="block text-sm font-medium text-gray-700">
+                                Duration (minutes)
+                            </label>
+                            <div class="mt-1">
+                                <%= number_input f, :duration, class:  "shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="pt-5">
+                    <div class="flex justify-end">
+                        <button type="submit"
+                            class="mr-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Add
+                        </button>
+                        <%= live_patch "Cancel", to: @return_to, class: "bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

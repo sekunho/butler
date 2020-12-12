@@ -41,6 +41,11 @@ defmodule ButlerWeb.TodoLive.Index do
     {:noreply, assign(socket, :todos, list_todos())}
   end
 
+  @impl true
+  def handle_event("new_todo", _params, socket) do
+    {:noreply, push_patch(socket, to: Routes.todo_index_path(socket, :new))}
+  end
+
   defp list_todos do
     Schedules.list_todos()
   end
