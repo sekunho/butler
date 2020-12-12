@@ -15,7 +15,7 @@ defmodule ButlerWeb.DayComponent do
           </li>
         <% else %>
           <%= for todo <- @todos do %>
-            <li class="inline-block bg-indigo-500 px-1 rounded cursor-pointer select-none hover:shadow-md text-white"
+            <li class="absolute bg-indigo-500 px-1 rounded cursor-pointer select-none hover:shadow-md text-white"
                 style="height: calc(3.25rem * <%= todo.duration %>); margin-top: calc(3.25rem * <%= todo.start %>);">
               <span class="text-xs font-medium">Continue with final project</span>
               <span class="text-xs">(00:00 - 00:15)</span>

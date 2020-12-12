@@ -94,7 +94,7 @@
                 <%= for day <- list_week() do %>
                     <%= live_component @socket, DayComponent,
                         day: day,
-                        todos: [%Todo{duration: 0.5, start: 0}, %Todo{duration: 0.5, start: 0}] %>
+                        todos: [%Todo{duration: 0.5, start: 0}, %Todo{duration: 0.5, start: 0.5}] %>
                 <% end %>
           </div>
       </div>
