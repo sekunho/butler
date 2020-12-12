@@ -1,164 +1,172 @@
+<%= if @live_action in [:new, :edit] do %>
+  <%= live_modal @socket, ButlerWeb.TodoLive.FormComponent,
+    id: @todo.id || :new,
+    title: @page_title,
+    action: @live_action,
+    todo: @todo,
+    return_to: Routes.todo_index_path(@socket, :index) %>
+<% end %>
+
 <div class="flex-1 grid grid-cols-four-one">
-  <div class="bg-white relative h-screen overflow-y-auto">
-    <div class="bg-white w-full flex space-x-4 items-end sticky top-0 z-20 py-6 pl-6 shadow-sm">
-      <div class="flex flex-col space-y-4">
-        <nav class="flex" aria-label="Breadcrumb">
-            <ol class="flex items-center space-x-4">
-                <li>
-                    <div>
-                        <a href="#" class="text-gray-400 hover:text-gray-500">
-                            <!-- Heroicon name: home -->
-                            <svg class="flex-shrink-0 h-5 w-5" xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                <path
-                                    d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+    <div class="bg-white relative h-screen overflow-y-auto">
+        <div class="bg-white w-full flex space-x-4 items-end sticky top-0 z-20 py-6 pl-6 shadow-sm">
+            <div class="flex flex-col space-y-4">
+                <nav class="flex" aria-label="Breadcrumb">
+                    <ol class="flex items-center space-x-4">
+                        <li>
+                            <div>
+                                <a href="#" class="text-gray-400 hover:text-gray-500">
+                                    <!-- Heroicon name: home -->
+                                    <svg class="flex-shrink-0 h-5 w-5" xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                        <path
+                                            d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                                    </svg>
+                                    <span class="sr-only">Home</span>
+                                </a>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="flex items-center">
+                                <!-- Heroicon name: chevron-right -->
+                                <svg class="flex-shrink-0 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path fill-rule="evenodd"
+                                        d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                                <a href="#" class="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700">
+                                    New Schedule
+                                </a>
+                            </div>
+                        </li>
+                    </ol>
+                </nav>
+
+                <div class="flex space-x-2 items-center">
+                    <span class="relative z-0 inline-flex shadow-sm rounded-md">
+                        <button type="button"
+                            class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
+                            <span class="sr-only">Previous</span>
+                            <!-- Heroicon name: chevron-left -->
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd"
+                                    d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                                    clip-rule="evenodd" />
                             </svg>
-                            <span class="sr-only">Home</span>
-                        </a>
-                    </div>
-                </li>
-                <li>
-                    <div class="flex items-center">
-                        <!-- Heroicon name: chevron-right -->
-                        <svg class="flex-shrink-0 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                            <path fill-rule="evenodd"
-                                d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                                clip-rule="evenodd" />
-                        </svg>
-                        <a href="#" class="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700">
-                          New Schedule
-                        </a>
-                    </div>
-                </li>
-            </ol>
-        </nav>
+                        </button>
+                        <button type="button"
+                            class="-ml-px relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
+                            <span class="sr-only">Next</span>
+                            <!-- Heroicon name: chevron-right -->
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd"
+                                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </span>
 
-        <div class="flex space-x-2 items-center">
-            <span class="relative z-0 inline-flex shadow-sm rounded-md">
-                <button type="button"
-                    class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
-                    <span class="sr-only">Previous</span>
-                    <!-- Heroicon name: chevron-left -->
-                    <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                        fill="currentColor" aria-hidden="true">
-                        <path fill-rule="evenodd"
-                            d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                            clip-rule="evenodd" />
-                    </svg>
-                </button>
-                <button type="button"
-                    class="-ml-px relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
-                    <span class="sr-only">Next</span>
-                    <!-- Heroicon name: chevron-right -->
-                    <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                        fill="currentColor" aria-hidden="true">
-                        <path fill-rule="evenodd"
-                            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                            clip-rule="evenodd" />
-                    </svg>
-                </button>
-            </span>
+                    <h3 class="text-3xl text-gray-800">
+                        <span class="font-bold font-display ml-2">
+                            <%= Timex.month_name(Timex.today() |> Map.get(:month)) %>
+                        </span>
+                        <%= Timex.today() |> Map.get(:year) %>
+                    </h3>
+                </div>
+            </div>
 
-            <h3 class="text-3xl text-gray-800">
-                <span class="font-bold font-display ml-2">
-                    <%= Timex.month_name(Timex.today() |> Map.get(:month)) %>
-                </span>
-                <%= Timex.today() |> Map.get(:year) %>
-            </h3>
+            <button type="button"
+                class="inline-flex items-center p-3 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-full text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <!-- Heroicon name: refresh -->
+                <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+            </button>
         </div>
-      </div>
 
-      <button type="button"
-          class="inline-flex items-center p-3 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-full text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-          <!-- Heroicon name: refresh -->
-          <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-              stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-      </button>
-    </div>
-
-      <div class="flex pt-6">
-          <div class="pt-12">
-              <ul class="timeline text-sm text-gray-500 mr-4">
+        <div class="flex pt-6 pl-4">
+            <div class="pt-12">
+                <ul class="timeline text-sm text-gray-500 mr-4">
                 <%= for hour <- 0..23 do %>
-                  <li>
-                  <span><%= IO.iodata_to_binary([Integer.to_string(hour), ":00"]) %></span>
-                  </li>
+                    <li>
+                    <span><%= IO.iodata_to_binary([Integer.to_string(hour), ":00"]) %></span>
+                    </li>
                 <% end %>
-              </ul>
-          </div>
-          <div class="grid grid-cols-7 text-gray-500 divide-x w-full z-10">
+                </ul>
+            </div>
+            <div class="grid grid-cols-7 text-gray-500 divide-x w-full z-10">
                 <%= for day <- list_week() do %>
                     <%= live_component @socket, DayComponent,
                         day: day,
                         todos: [%Todo{duration: 0.5, start: 0}, %Todo{duration: 0.5, start: 0.5}] %>
                 <% end %>
-          </div>
-      </div>
-  </div>
+            </div>
+        </div>
+    </div>
 
     <div class="h-full flex flex-col py-6 bg-white border-l overflow-y-scroll">
         <div class="px-4 sm:px-6">
             <h2 id="slide-over-heading" class="text-lg font-medium text-gray-900">
-                Todos
+                Todo List
             </h2>
         </div>
         <div class="mt-6 relative flex-1 px-4 sm:px-6 ">
             <div class="absolute inset-0 px-4 sm:px-6">
                 <div class="h-full" aria-hidden="true">
-                    <!-- This example requires Tailwind CSS v2.0+ -->
-                    <ul class="space-y-2.5">
-                        <li
-                            class="bg-white flex items-center justify-between border p-2.5 rounded hover:border-indigo-600 transition-colors duration-200 ease-in-out select-none cursor-pointer">
-                            <div>
-                                <p class="text-sm text-gray-900 mb-1">Read lecture materials</p>
-                                <p class="text-sm text-gray-500">
-                                    <span
-                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                        15 minutes
-                                    </span>
-                                    <span
-                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                        Urgent
-                                    </span>
-                                </p>
+                    <button type="button" class="inline-flex mb-2 items-center justify-center w-full px-6 py-3 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <svg class="text-gray-500 h-5 w-5 mr-1.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Add todo
+                    </button>
+                    <ul class="space-y-2">
+                        <%= if true do %>
+                            <div class="mt-24 mx-auto flex items-center justify-center h-24 w-24">
+                                <svg class="text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
                             </div>
-                        </li>
-                        <li
-                            class="bg-white flex items-center justify-between border p-2.5 rounded hover:border-indigo-600 transition-colors duration-200 ease-in-out select-none cursor-pointer">
-                            <div>
-                                <p class="text-sm text-gray-900 mb-1">Read lecture materials</p>
-                                <p class="text-sm text-gray-500">
-                                    <span
-                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                        15 minutes
-                                    </span>
-                                    <span
-                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                        Urgent
-                                    </span>
-                                </p>
+                            <div class="mt-3 text-center sm:mt-5">
+                                <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-headline">
+                                    Empty
+                                </h3>
+                                <div class="mt-2">
+                                    <p class="text-sm text-gray-500">
+                                        You haven't added any things todo yet!
+                                    </p>
+                                </div>
                             </div>
-                        </li>
-                        <li
-                            class="bg-white flex items-center justify-between border p-2.5 rounded hover:border-indigo-600 transition-colors duration-200 ease-in-out select-none cursor-pointer">
-                            <div>
-                                <p class="text-sm text-gray-900 mb-1">Read lecture materials</p>
-                                <p class="text-sm text-gray-500">
-                                    <span
-                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                        15 minutes
-                                    </span>
-                                    <span
-                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                        Urgent
-                                    </span>
-                                </p>
-                            </div>
-                        </li>
+                        <% else %>
+                            <%= for _ <- 1..2 do %>
+                                <li class="bg-white rounded-md cursor-pointer py-4 flex justify-between hover:shadow-md px-1.5 border border-gray-300">
+                                    <div class="ml-3">
+                                        <p class="text-sm font-medium text-gray-900">Todo #1</p>
+                                        <div class="mt-2 flex items-center text-sm text-gray-500 space-x-2">
+                                            <div class="flex items-center">
+                                                <!-- Heroicon name: clock -->
+                                                <svg class="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                                <span class="truncate">15 minutes</span>
+                                            </div>
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-pink-100 text-pink-800">
+                                                High
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="items-center px-2.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                        <svg class="h-3.5 w-3.5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                        </svg>
+                                    </button>
+                                </li>
+                            <% end %>
+                        <% end %>
                     </ul>
                 </div>
             </div>
