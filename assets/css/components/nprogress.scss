@@ -1,0 +1,9 @@
+#nprogress {
+  .bar {
+    @apply z-40 bg-indigo-600;
+  }
+
+  .spinner-icon {
+    @apply z-40 border-l border-t border-indigo-600;
+  }
+}
