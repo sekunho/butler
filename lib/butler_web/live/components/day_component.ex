@@ -16,6 +16,8 @@ defmodule ButlerWeb.DayComponent do
                     style="height: calc(3.25rem * 24);">
                 </li>
             <% else %>
+                <!-- CURRENT TIME INDICATOR -->
+                <li class="w-full h-0.5 bg-red-600 absolute z-10" style="margin-top: calc(3.25rem * 14);"></li>
                 <%= for todo <- @todos do %>
                     <li class="absolute w-full bg-indigo-500 px-1 rounded cursor-pointer select-none hover:shadow-lg text-white"
                         style="height: calc(3.25rem * <%= todo.duration %>); margin-top: calc(3.25rem * <%= todo.start %>);">
@@ -28,6 +30,7 @@ defmodule ButlerWeb.DayComponent do
                             </span>
                         </p>
                     </li>
+
                 <% end %>
             <% end %>
         </ul>
