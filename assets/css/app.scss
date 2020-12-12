@@ -1,8 +1,22 @@
 /* This file is for your main application css. */
 @import "tailwindcss/base";
 @import "tailwindcss/components";
+@import "./components/day.scss";
 @import "tailwindcss/utilities";
 @import "../node_modules/nprogress/nprogress.css";
+
+.timeline li {
+  @apply py-4 pl-2;
+}
+
+.timeline li::after {
+  @apply absolute left-0 w-full bg-gray-200;
+}
+
+.timeline li::after {
+  content: '';
+  height: 1px;
+}
 
 /* LiveView specific classes for your customizations */
 .phx-no-feedback.invalid-feedback,
@@ -25,7 +39,6 @@
 .phx-modal {
   opacity: 1!important;
   position: fixed;
-  z-index: 1;
   left: 0;
   top: 0;
   width: 100%;
@@ -65,29 +78,39 @@
   border: 1px solid transparent;
   border-radius: 4px;
 }
+
 .alert-info {
   color: #31708f;
   background-color: #d9edf7;
   border-color: #bce8f1;
 }
+
 .alert-warning {
   color: #8a6d3b;
   background-color: #fcf8e3;
   border-color: #faebcc;
 }
+
 .alert-danger {
   color: #a94442;
   background-color: #f2dede;
   border-color: #ebccd1;
 }
+
 .alert p {
   margin-bottom: 0;
 }
+
 .alert:empty {
   display: none;
 }
+
 .invalid-feedback {
   color: #a94442;
   display: block;
   margin: -1rem 0 2rem;
+}
+
+iframe {
+  @apply h-0;
 }

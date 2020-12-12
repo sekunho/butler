@@ -20,6 +20,17 @@ defmodule ButlerWeb.Router do
     live "/", PageLive, :index
   end
 
+  scope "/schedule", ButlerWeb do
+    pipe_through :browser
+
+    live "/", TodoLive.Index, :index
+    live "/todos/new", TodoLive.Index, :new
+    live "/todos/:id/edit", TodoLive.Index, :edit
+
+    live "/todos/:id", TodoLive.Show, :show
+    live "/todos/:id/show/edit", TodoLive.Show, :edit
+  end
+
   # Other scopes may use custom stacks.
   # scope "/api", ButlerWeb do
   #   pipe_through :api
