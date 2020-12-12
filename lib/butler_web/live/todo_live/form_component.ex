@@ -28,13 +28,34 @@ defmodule ButlerWeb.TodoLive.FormComponent do
   end
 
   def save_todo(socket, :new, todo_params) do
-    IO.inspect todo_params
+    todo_params =
+      todo_params
+      |> Map.update("priority", 1, &String.to_integer(&1))
+      |> Map.update("duration", 15, &String.to_integer(&1))
 
-    {:noreply, socket}
+    IO.inspect todo_params, label: "PARAMS"
+
+    send(self(), {:added_todo, todo_params})
+
+    {:noreply,
+      socket
+      |> put_flash(:info, "Todo added")
+      |> push_patch(to: Routes.todo_index_path(socket, :new))
+    }
   end
 
-  def list_priorities do
-    ["None", "Low", "Medium", "High"]
+  def save_todo(socket, :edit, todo_params) do
+    IO.inspect todo_params, label: "EDIT"
+
+    {:noreply,
+      socket
+      |> put_flash(:info, "Todo updated successfully!")
+      |> push_redirect(to: socket.assigns.return_to)
+    }
+  end
+
+  defp list_priorities do
+    ["None": 1, "Low": 2, "Medium": 3, "High": 4]
   end
 
   # defp save_todo(socket, :edit, todo_params) do

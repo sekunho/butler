@@ -7,7 +7,7 @@
     return_to: Routes.todo_index_path(@socket, :index) %>
 <% end %>
 
-<div phx-window-keyup="new_todo" phx-key="n" class="flex-1 grid grid-cols-four-one">
+<div phx-window-keydown="new_todo" phx-key="n" class="flex-1 grid grid-cols-four-one">
     <div class="bg-white relative h-screen overflow-y-auto">
         <div class="bg-white w-full flex space-x-4 items-end sticky top-0 z-20 py-6 pl-6 shadow-sm">
             <div class="flex flex-col space-y-4">
@@ -120,46 +120,48 @@
                         Add todo
                     <% end %>
                     <ul class="space-y-2">
-                        <%= if true do %>
-                            <div class="mt-24 mx-auto flex items-center justify-center h-24 w-24">
-                                <svg class="text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
-                            <div class="mt-3 text-center sm:mt-5">
-                                <h3 class="text-lg leading-6 font-medium text-gray-900">
-                                    Empty
-                                </h3>
-                                <div class="mt-2">
-                                    <p class="text-sm text-gray-500">
-                                        You haven't added any things to do yet!
-                                    </p>
+                        <%= case @todos do %>
+                            <% [] -> %>
+                                <div class="mt-24 mx-auto flex items-center justify-center h-24 w-24">
+                                    <svg class="text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
                                 </div>
-                            </div>
-                        <% else %>
-                            <%= for _ <- 1..2 do %>
-                                <li class="bg-white rounded-md cursor-pointer py-4 flex justify-between hover:shadow-md px-1.5 border border-gray-300">
-                                    <div class="ml-3">
-                                        <p class="text-sm font-medium text-gray-900">Todo #1</p>
-                                        <div class="mt-2 flex items-center text-sm text-gray-500 space-x-2">
-                                            <div class="flex items-center">
-                                                <svg class="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                </svg>
-                                                <span class="truncate">15 minutes</span>
-                                            </div>
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-pink-100 text-pink-800">
-                                                High
-                                            </span>
-                                        </div>
+                                <div class="mt-3 text-center sm:mt-5">
+                                    <h3 class="text-lg leading-6 font-medium text-gray-900">
+                                        Empty
+                                    </h3>
+                                    <div class="mt-2">
+                                        <p class="text-sm text-gray-500">
+                                            You haven't added any things to do yet!
+                                        </p>
                                     </div>
-                                    <button type="button" class="items-center px-2.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                        <svg class="h-3.5 w-3.5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                        </svg>
-                                    </button>
-                                </li>
-                            <% end %>
+                                </div>
+
+                            <% [_ | _] -> %>
+                                <%= for todo <- @todos do %>
+                                    <li class="bg-white rounded-md cursor-pointer py-4 flex justify-between hover:shadow-md px-1.5 border border-gray-300">
+                                        <div class="ml-3">
+                                            <p class="text-sm font-medium text-gray-900"><%= todo["name"] %></p>
+                                            <div class="mt-2 flex items-center text-sm text-gray-500 space-x-2">
+                                                <div class="flex items-center">
+                                                    <svg class="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                    <span class="truncate"><%= todo["duration"] %> minutes</span>
+                                                </div>
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-pink-100 text-pink-800">
+                                                    <%= get_priority(todo["priority"]) %>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <button type="button" class="items-center px-2.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                            <svg class="h-3.5 w-3.5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </button>
+                                    </li>
+                                <% end %>
                         <% end %>
                     </ul>
                 </div>

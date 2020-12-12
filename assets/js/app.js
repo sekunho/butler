@@ -19,16 +19,7 @@ import { LiveSocket } from "phoenix_live_view"
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, {
-    params: { _csrf_token: csrfToken },
-    metadata: {
-        keyup: (e, el) => {
-            return {
-                key: e.key,
-                metaKey: e.metaKey,
-                repeat: e.repeat
-            }
-        }
-    }
+    params: { _csrf_token: csrfToken }
 })
 
 // Show progress bar on live navigation and form submits

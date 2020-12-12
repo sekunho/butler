@@ -46,6 +46,14 @@ defmodule ButlerWeb.TodoLive.Index do
     {:noreply, push_patch(socket, to: Routes.todo_index_path(socket, :new))}
   end
 
+  @impl true
+  def handle_info({:added_todo, todo}, socket) do
+    socket = update(socket, :todos, fn ts -> [todo | ts] end)
+    IO.inspect socket, label: "NEW SOCKET"
+
+    {:noreply, socket}
+  end
+
   defp list_todos do
     Schedules.list_todos()
   end
@@ -60,5 +68,14 @@ defmodule ButlerWeb.TodoLive.Index do
       [day | week]
     end)
     |> Enum.reverse()
+  end
+
+  defp get_priority(num) do
+    case num do
+      1 -> "None"
+      2 -> "Low"
+      3 -> "Medium"
+      4 -> "High"
+    end
   end
 end
