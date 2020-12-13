@@ -11,7 +11,7 @@ let
 in
 
 mkShell {
-  buildInputs = [cacert git erlang elixir cargo nodejs postgresql]
+  buildInputs = [cacert git erlang elixir cargo nodejs]
     ++ optional stdenv.isLinux inotify-tools
     ++ optionals stdenv.isDarwin (with darwin.apple_sdk.frameworks; [
       CoreFoundation
