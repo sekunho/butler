@@ -7,11 +7,18 @@ defmodule ButlerWeb.TodoLive.Index do
 
   @impl true
   def mount(_params, session, socket) do
-    {:ok,
-      socket
-      |> assign(:todos, list_todos())
-      |> assign_defaults(session)
-    }
+    socket = assign_defaults(socket, session)
+
+    case socket.assigns.current_user do
+      nil ->
+        {:ok,
+          socket
+          |> put_flash(:error, "You have to be logged to access that.")
+          |> push_redirect(to: Routes.user_session_path(socket, :new))
+        }
+
+      _ -> {:ok, assign(socket, :todos, list_todos())}
+    end
   end
 
   @impl true
