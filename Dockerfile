@@ -37,4 +37,4 @@ COPY --from=phx-builder /opt/app/mix.* /opt/app/
 # COPY --from=phx-builder /opt/app /opt/app
 # be warned, this will however copy over non-build files
 
-# CMD ["_build/prod/rel/butler/bin/butler", "start"]
+CMD ["_build/prod/rel/butler/bin/butler", "start"]
