@@ -33,8 +33,6 @@ defmodule ButlerWeb.TodoLive.FormComponent do
       |> Map.update("priority", 1, &String.to_integer(&1))
       |> Map.update("duration", 15, &String.to_integer(&1))
 
-    IO.inspect todo_params, label: "PARAMS"
-
     send(self(), {:added_todo, todo_params})
 
     {:noreply,
@@ -44,9 +42,7 @@ defmodule ButlerWeb.TodoLive.FormComponent do
     }
   end
 
-  def save_todo(socket, :edit, todo_params) do
-    IO.inspect todo_params, label: "EDIT"
-
+  def save_todo(socket, :edit, _todo_params) do
     {:noreply,
       socket
       |> put_flash(:info, "Todo updated successfully!")

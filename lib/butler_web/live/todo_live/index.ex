@@ -6,8 +6,19 @@ defmodule ButlerWeb.TodoLive.Index do
   alias ButlerWeb.DayComponent
 
   @impl true
-  def mount(_params, _session, socket) do
-    {:ok, assign(socket, :todos, list_todos())}
+  def mount(_params, session, socket) do
+    socket = assign_defaults(socket, session)
+
+    case socket.assigns.current_user do
+      nil ->
+        {:ok,
+          socket
+          |> put_flash(:error, "You have to be logged to access that.")
+          |> push_redirect(to: Routes.user_session_path(socket, :new))
+        }
+
+      _ -> {:ok, assign(socket, :todos, list_todos())}
+    end
   end
 
   @impl true
@@ -49,7 +60,6 @@ defmodule ButlerWeb.TodoLive.Index do
   @impl true
   def handle_info({:added_todo, todo}, socket) do
     socket = update(socket, :todos, fn ts -> [todo | ts] end)
-    IO.inspect socket, label: "NEW SOCKET"
 
     {:noreply, socket}
   end

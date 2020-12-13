@@ -12,26 +12,26 @@ defmodule ButlerWeb.DayComponent do
         </div>
         <ul class="mt-4 relative">
             <%= if is_disabled?(@day) do %>
-                <li class="bg-gray-400 opacity-10 cursor-not-allowed select-none text-white"
-                    style="height: calc(3.25rem * 24);">
-                </li>
-            <% else %>
-                <!-- CURRENT TIME INDICATOR -->
-                <li class="w-full h-0.5 bg-red-600 absolute z-10" style="margin-top: calc(3.25rem * 14);"></li>
-                <%= for todo <- @todos do %>
-                    <li class="absolute w-full bg-indigo-500 px-1 rounded cursor-pointer select-none hover:shadow-lg text-white"
-                        style="height: calc(3.25rem * <%= todo.duration %>); margin-top: calc(3.25rem * <%= todo.start %>);">
-                        <p class="text-xs font-medium truncate">
-                            <span>
-                                Continue with final project
-                            </span>
-                            <span class="ml-1.5">
-                                0:00
-                            </span>
-                        </p>
-                    </li>
+            <li class="absolute w-full bg-gray-400 opacity-20 z-10 cursor-not-allowed select-none text-white"
+                style="height: calc(3.25rem * 24);">
+            </li>
+            <% end %>
 
-                <% end %>
+            <%= if is_today?(@day) do %>
+                <li class="w-full h-0.5 bg-red-600 absolute z-10" style="margin-top: calc(3.25rem * 14);"></li>
+            <% end %>
+            <%= for todo <- @todos do %>
+            <li class="absolute w-full bg-indigo-500 px-1 rounded cursor-pointer select-none hover:shadow-lg text-white"
+                style="height: calc(3.25rem * <%= todo.duration %>); margin-top: calc(3.25rem * <%= todo.start %>);">
+                <p class="text-xs font-medium truncate">
+                    <span>
+                        Continue with final project
+                    </span>
+                    <span class="ml-1.5">
+                        0:00
+                    </span>
+                </p>
+            </li>
             <% end %>
         </ul>
     </div>
