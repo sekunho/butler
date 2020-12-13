@@ -49,7 +49,6 @@ defmodule ButlerWeb.TodoLive.Index do
   @impl true
   def handle_info({:added_todo, todo}, socket) do
     socket = update(socket, :todos, fn ts -> [todo | ts] end)
-    IO.inspect socket, label: "NEW SOCKET"
 
     {:noreply, socket}
   end
