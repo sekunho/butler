@@ -6,8 +6,12 @@ defmodule ButlerWeb.TodoLive.Index do
   alias ButlerWeb.DayComponent
 
   @impl true
-  def mount(_params, _session, socket) do
-    {:ok, assign(socket, :todos, list_todos())}
+  def mount(_params, session, socket) do
+    {:ok,
+      socket
+      |> assign(:todos, list_todos())
+      |> assign_defaults(session)
+    }
   end
 
   @impl true

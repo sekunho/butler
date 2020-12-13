@@ -9,6 +9,14 @@
 
 @import "tailwindcss/utilities";
 
+.sample-nav {
+  flex: 0 0 auto;
+}
+
+.sample {
+  flex: 1 1 auto;
+}
+
 /* LiveView specific classes for your customizations */
 .phx-no-feedback.invalid-feedback,
 .phx-no-feedback .invalid-feedback {
