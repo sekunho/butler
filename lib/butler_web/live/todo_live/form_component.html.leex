@@ -22,6 +22,7 @@
                             <div class="mt-1 flex rounded-md shadow-sm">
                                 <%= text_input f, :name, placeholder: "Do something", class: "flex-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full min-w-0 rounded-md sm:text-sm border-gray-300" %>
                             </div>
+                            <%= error_tag f, :name %>
                         </div>
                         <div class="sm:col-span-3">
                             <label for="country" class="block text-sm font-medium text-gray-700">
@@ -30,6 +31,7 @@
                             <div class="mt-1">
                                 <%= select f, :priority, list_priorities(), class: "shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" %>
                             </div>
+                            <%= error_tag f, :priority %>
                         </div>
                         <div class="sm:col-span-3">
                             <label for="last_name" class="block text-sm font-medium text-gray-700">
@@ -38,6 +40,7 @@
                             <div class="mt-1">
                                 <%= number_input f, :duration, class:  "shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" %>
                             </div>
+                            <%= error_tag f, :duration %>
                         </div>
                     </div>
                 </div>

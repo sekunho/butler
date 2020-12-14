@@ -44,6 +44,7 @@ defmodule Butler.MixProject do
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:phoenix_live_dashboard, "~> 0.4"},
       {:phx_gen_auth, "~> 0.6", only: [:dev], runtime: false},
+      {:phoenix_pubsub, "~> 2.0"},
       {:telemetry_metrics, "~> 0.4"},
       {:telemetry_poller, "~> 0.4"},
       {:gettext, "~> 0.11"},

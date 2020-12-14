@@ -9,6 +9,12 @@ defmodule ButlerWeb.TodoLive.Index do
   def mount(_params, session, socket) do
     socket = assign_defaults(socket, session)
 
+    if connected?(socket) do
+      # Users can only be updated on changes of their own todos.
+      topic = IO.iodata_to_binary(["todos:", socket.assigns.current_user.id])
+      Schedules.subscribe(topic)
+    end
+
     case socket.assigns.current_user do
       nil ->
         {:ok,
@@ -58,7 +64,7 @@ defmodule ButlerWeb.TodoLive.Index do
   end
 
   @impl true
-  def handle_info({:added_todo, todo}, socket) do
+  def handle_info({:created_todo, todo}, socket) do
     socket = update(socket, :todos, fn ts -> [todo | ts] end)
 
     {:noreply, socket}

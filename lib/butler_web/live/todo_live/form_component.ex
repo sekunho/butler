@@ -19,7 +19,14 @@ defmodule ButlerWeb.TodoLive.FormComponent do
 
   @impl true
   def handle_event("validate_todo", %{"todo" => todo_params}, socket) do
-    todo_params = Map.put(todo_params, "user_id", socket.assigns.current_user)
+    todo_params =
+      todo_params
+      |> Map.put("user_id", socket.assigns.current_user)
+      |> Map.update("duration", 15, fn
+        "" -> ""
+        d ->
+          String.to_integer(d)
+      end)
 
     changeset =
       socket.assigns.todo
@@ -34,22 +41,16 @@ defmodule ButlerWeb.TodoLive.FormComponent do
   end
 
   def save_todo(socket, :new, todo_params) do
-    todo_params =
-      todo_params
-      |> Map.update("priority", 1, fn p ->
-        p
-        |> String.downcase()
-        |> String.to_atom()
-      end)
-      |> Map.update("duration", 15, &String.to_integer(&1))
+    todo_params = Map.update(todo_params, "duration", 15, &String.to_integer(&1))
 
     with %User{} = current_user <- Map.get(socket.assigns, :current_user),
          true <- can?(current_user, :create, Todo),
          todo_params <- Map.put(todo_params, "user_id", current_user.id),
-         {:ok, _todo} <- Schedules.create_todo(todo_params) do
+         {:ok, _todo} <- Schedules.create_todo(todo_params, [:user]) do
       {:noreply,
         socket
         |> put_flash(:info, "Todo created successfully")
+        |> assign(:todo, %Todo{})
         |> push_patch(to: Routes.todo_index_path(socket, :new))}
     else
       {:error, %Ecto.Changeset{} = changeset} ->
@@ -72,7 +73,7 @@ defmodule ButlerWeb.TodoLive.FormComponent do
   end
 
   defp list_priorities do
-    ["None", "Low", "Medium", "High"]
+    ["None": :none, "Low": :low, "Medium": :medium, "High": :high]
   end
 
   # defp save_todo(socket, :edit, todo_params) do

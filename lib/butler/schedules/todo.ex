@@ -18,9 +18,11 @@ defmodule Butler.Schedules.Todo do
   end
 
   @doc false
+  @min_duration 15
   def changeset(todo, attrs) do
     todo
     |> cast(attrs, [:name, :start, :duration, :priority, :user_id])
     |> validate_required([:name, :duration, :priority, :user_id])
+    |> validate_number(:duration, greater_than_or_equal_to: @min_duration)
   end
 end
