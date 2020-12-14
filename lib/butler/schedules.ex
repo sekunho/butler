@@ -31,9 +31,10 @@ defmodule Butler.Schedules do
       [%Todo{}, ...]
 
   """
-  def list_todos do
+  def list_todos(user_id) do
     query =
       from t in Todo,
+      where: t.user_id == ^user_id,
       order_by: [desc: t.inserted_at]
 
     Repo.all(query)

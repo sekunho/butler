@@ -4,6 +4,7 @@ defmodule ButlerWeb.TodoLive.Index do
   alias Butler.Schedules
   alias Butler.Schedules.Todo
   alias ButlerWeb.DayComponent
+  alias Butler.Accounts.User
 
   @impl true
   def mount(_params, session, socket) do
@@ -23,7 +24,7 @@ defmodule ButlerWeb.TodoLive.Index do
           |> push_redirect(to: Routes.user_session_path(socket, :new))
         }
 
-      _ -> {:ok, assign(socket, :todos, list_todos())}
+      %User{id: user_id} -> {:ok, assign(socket, :todos, list_todos(user_id)), temporary_assigns: []}
     end
   end
 
@@ -55,7 +56,7 @@ defmodule ButlerWeb.TodoLive.Index do
     todo = Schedules.get_todo!(id)
     {:ok, _} = Schedules.delete_todo(todo)
 
-    {:noreply, assign(socket, :todos, list_todos())}
+    {:noreply, assign(socket, :todos, list_todos(socket.assigns.current_user.id))}
   end
 
   @impl true
@@ -70,8 +71,8 @@ defmodule ButlerWeb.TodoLive.Index do
     {:noreply, socket}
   end
 
-  defp list_todos do
-    Schedules.list_todos()
+  defp list_todos(user_id) do
+    Schedules.list_todos(user_id)
   end
 
   def list_week do
