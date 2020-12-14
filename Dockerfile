@@ -1,5 +1,7 @@
 FROM boreddevco/alpine-elixir-phoenix:1.11.1 AS phx-builder
 
+# TODO: ADD `matrex` DEPENDENCIES
+
 # Set exposed ports
 ENV MIX_ENV=prod
 

@@ -52,7 +52,8 @@ defmodule Butler.MixProject do
       {:plug_cowboy, "~> 2.0"},
       {:timex, "~> 3.5"},
       {:canada, "~> 2.0"},
-      {:mix_test_watch, "~> 1.0", only: :dev, runtime: false}
+      {:mix_test_watch, "~> 1.0", only: :dev, runtime: false},
+      {:scheduler, git: "https://github.com/butlerph/scheduler.git", tag: "0.1"}
     ]
   end
 
