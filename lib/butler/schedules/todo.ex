@@ -2,6 +2,8 @@ defmodule Butler.Schedules.Todo do
   use Ecto.Schema
   import Ecto.Changeset
 
+  alias Butler.Accounts.User
+
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
   schema "todos" do
@@ -10,13 +12,15 @@ defmodule Butler.Schedules.Todo do
     field :priority, Ecto.Enum, values: [:none, :low, :medium, :high]
     field :start, :utc_datetime
 
+    belongs_to :user, User, foreign_key: :user_id, type: :binary_id
+
     timestamps()
   end
 
   @doc false
   def changeset(todo, attrs) do
     todo
-    |> cast(attrs, [:name, :start, :duration, :priority])
-    |> validate_required([:name, :start, :duration, :priority])
+    |> cast(attrs, [:name, :start, :duration, :priority, :user_id])
+    |> validate_required([:name, :duration, :priority, :user_id])
   end
 end

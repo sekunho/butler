@@ -80,12 +80,9 @@ defmodule ButlerWeb.TodoLive.Index do
     |> Enum.reverse()
   end
 
-  defp get_priority(num) do
-    case num do
-      1 -> "None"
-      2 -> "Low"
-      3 -> "Medium"
-      4 -> "High"
-    end
+  defp get_priority(priority) do
+    priority
+    |> Atom.to_string()
+    |> String.capitalize()
   end
 end

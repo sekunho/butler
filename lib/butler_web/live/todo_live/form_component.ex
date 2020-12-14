@@ -1,11 +1,15 @@
 defmodule ButlerWeb.TodoLive.FormComponent do
   use ButlerWeb, :live_component
 
+  import Canada.Can, only: [can?: 3]
+
   alias Butler.Schedules
+  alias Butler.Schedules.Todo
+  alias Butler.Accounts.User
 
   @impl true
   def update(%{todo: todo} = assigns, socket) do
-    changeset = Schedules.change_todo(todo)
+    changeset = Schedules.change_todo(todo, %{user: assigns.current_user})
 
     {:ok,
      socket
@@ -15,6 +19,8 @@ defmodule ButlerWeb.TodoLive.FormComponent do
 
   @impl true
   def handle_event("validate_todo", %{"todo" => todo_params}, socket) do
+    todo_params = Map.put(todo_params, "user_id", socket.assigns.current_user)
+
     changeset =
       socket.assigns.todo
       |> Schedules.change_todo(todo_params)
@@ -30,16 +36,31 @@ defmodule ButlerWeb.TodoLive.FormComponent do
   def save_todo(socket, :new, todo_params) do
     todo_params =
       todo_params
-      |> Map.update("priority", 1, &String.to_integer(&1))
+      |> Map.update("priority", 1, fn p ->
+        p
+        |> String.downcase()
+        |> String.to_atom()
+      end)
       |> Map.update("duration", 15, &String.to_integer(&1))
 
-    send(self(), {:added_todo, todo_params})
+    with %User{} = current_user <- Map.get(socket.assigns, :current_user),
+         true <- can?(current_user, :create, Todo),
+         todo_params <- Map.put(todo_params, "user_id", current_user.id),
+         {:ok, _todo} <- Schedules.create_todo(todo_params) do
+      {:noreply,
+        socket
+        |> put_flash(:info, "Todo created successfully")
+        |> push_patch(to: Routes.todo_index_path(socket, :new))}
+    else
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {:noreply, assign(socket, changeset: changeset)}
 
-    {:noreply,
-      socket
-      |> put_flash(:info, "Todo added")
-      |> push_patch(to: Routes.todo_index_path(socket, :new))
-    }
+      _ ->
+        {:noreply,
+          socket
+          |> put_flash(:error, "You're not allowed to do that.")
+          |> push_redirect(to: socket.assigns.return_to)}
+    end
   end
 
   def save_todo(socket, :edit, _todo_params) do
@@ -51,7 +72,7 @@ defmodule ButlerWeb.TodoLive.FormComponent do
   end
 
   defp list_priorities do
-    ["None": 1, "Low": 2, "Medium": 3, "High": 4]
+    ["None", "Low", "Medium", "High"]
   end
 
   # defp save_todo(socket, :edit, todo_params) do

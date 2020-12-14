@@ -4,6 +4,7 @@
     title: @page_title,
     action: @live_action,
     todo: @todo,
+    current_user: @current_user,
     return_to: Routes.todo_index_path(@socket, :index) %>
 <% end %>
 
@@ -147,16 +148,16 @@
                                     <%= for todo <- @todos do %>
                                         <li class="bg-white rounded-md cursor-pointer py-4 flex justify-between hover:shadow-md px-1.5 border border-gray-300">
                                             <div class="ml-3">
-                                                <p class="text-sm font-medium text-gray-900"><%= todo["name"] %></p>
+                                                <p class="text-sm font-medium text-gray-900"><%= todo.name %></p>
                                                 <div class="mt-2 flex items-center text-sm text-gray-500 space-x-2">
                                                     <div class="flex items-center">
                                                         <svg class="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                         </svg>
-                                                        <span class="truncate"><%= todo["duration"] %> minutes</span>
+                                                        <span class="truncate"><%= todo.duration %> minutes</span>
                                                     </div>
                                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-pink-100 text-pink-800">
-                                                        <%= get_priority(todo["priority"]) %>
+                                                        <%= get_priority(todo.priority) %>
                                                     </span>
                                                 </div>
                                             </div>
