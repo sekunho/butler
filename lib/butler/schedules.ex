@@ -32,7 +32,11 @@ defmodule Butler.Schedules do
 
   """
   def list_todos do
-    Repo.all(Todo)
+    query =
+      from t in Todo,
+      order_by: [desc: t.inserted_at]
+
+    Repo.all(query)
   end
 
   @doc """

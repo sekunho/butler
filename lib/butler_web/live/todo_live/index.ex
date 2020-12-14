@@ -65,7 +65,7 @@ defmodule ButlerWeb.TodoLive.Index do
 
   @impl true
   def handle_info({:created_todo, todo}, socket) do
-    socket = update(socket, :todos, fn ts -> [todo | ts] end)
+    socket = update(socket, :todos, fn todos -> [todo | todos] end)
 
     {:noreply, socket}
   end
