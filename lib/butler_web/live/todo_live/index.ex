@@ -87,6 +87,12 @@ defmodule ButlerWeb.TodoLive.Index do
     |> Enum.reverse()
   end
 
+  defp group_todos_by_day(todos) when is_list(todos) do
+    Enum.group_by(todos, fn todo ->
+      Timex.to_date(todo.start)
+    end)
+  end
+
   defp get_priority(priority) do
     priority
     |> Atom.to_string()
