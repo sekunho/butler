@@ -65,10 +65,36 @@ defmodule ButlerWeb.TodoLive.Index do
   end
 
   @impl true
+  def handle_event("run_scheduler", _params, socket) do
+    todos = run_scheduler(socket.assigns.current_user.id)
+
+    {:noreply,
+      socket
+      |> assign(:todos, todos)
+      |> put_flash(:info, "I've rescheduled your calendar! 🤵")}
+  end
+
+  @impl true
   def handle_info({:created_todo, todo}, socket) do
     socket = update(socket, :todos, fn todos -> [todo | todos] end)
 
     {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info(:run_scheduler, socket) do
+    send(self(), :close_modal)
+    todos = run_scheduler(socket.assigns.current_user.id)
+
+    {:noreply, assign(socket, :todos, todos)}
+  end
+
+  defp run_scheduler(user_id) do
+    user_id
+    |> Schedules.list_todos()
+    |> Schedules.auto_assign()
+
+    Schedules.list_todos(user_id)
   end
 
   defp list_todos(user_id) do

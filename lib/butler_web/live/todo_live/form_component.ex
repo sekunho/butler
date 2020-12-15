@@ -63,14 +63,25 @@ defmodule ButlerWeb.TodoLive.FormComponent do
   def save_todo(socket, :edit, todo_params) do
     case Schedules.update_todo(socket.assigns.todo, todo_params) do
       {:ok, _todo} ->
+        todos = run_scheduler(socket.assigns.current_user.id)
+
         {:noreply,
-         socket
-         |> put_flash(:info, "Todo updated successfully")
-         |> push_redirect(to: socket.assigns.return_to)}
+          socket
+          |> assign(:todos, todos)
+          |> put_flash(:info, "It has been updated. I also rescheduled your calendar! 😊")
+          |> push_redirect(to: socket.assigns.return_to)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, :changeset, changeset)}
     end
+  end
+
+  defp run_scheduler(user_id) do
+    user_id
+    |> Schedules.list_todos()
+    |> Schedules.auto_assign()
+
+    Schedules.list_todos(user_id)
   end
 
   defp list_priorities do
