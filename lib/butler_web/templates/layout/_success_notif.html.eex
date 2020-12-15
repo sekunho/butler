@@ -1,7 +1,7 @@
 <div role="alert"
     phx-click="lv:clear-flash"
     phx-value-key="info"
-    class="z-30 fixed inset-0 flex items-end justify-center px-4 py-6 pointer-events-none sm:p-6 sm:items-start sm:justify-end">
+    class="z-50 fixed inset-0 flex items-end justify-center px-4 py-6 pointer-events-none sm:p-6 sm:items-start sm:justify-end">
   <div class="max-w-sm w-full bg-white shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden">
     <div class="p-4">
       <div class="flex items-start">

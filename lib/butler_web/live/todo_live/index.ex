@@ -85,7 +85,6 @@ defmodule ButlerWeb.TodoLive.Index do
 
   @impl true
   def handle_info(:run_scheduler, socket) do
-    send(self(), :close_modal)
     todos = run_scheduler(socket.assigns.current_user.id)
 
     {:noreply, assign(socket, :todos, todos)}
