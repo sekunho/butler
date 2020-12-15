@@ -4,10 +4,17 @@ defmodule ButlerWeb.TodoLive.Index do
   alias Butler.Schedules
   alias Butler.Schedules.Todo
   alias ButlerWeb.DayComponent
+  alias Butler.Accounts.User
 
   @impl true
   def mount(_params, session, socket) do
     socket = assign_defaults(socket, session)
+
+    if connected?(socket) do
+      # Users can only be updated on changes of their own todos.
+      topic = IO.iodata_to_binary(["todos:", socket.assigns.current_user.id])
+      Schedules.subscribe(topic)
+    end
 
     case socket.assigns.current_user do
       nil ->
@@ -17,7 +24,7 @@ defmodule ButlerWeb.TodoLive.Index do
           |> push_redirect(to: Routes.user_session_path(socket, :new))
         }
 
-      _ -> {:ok, assign(socket, :todos, list_todos())}
+      %User{id: user_id} -> {:ok, assign(socket, :todos, list_todos(user_id)), temporary_assigns: []}
     end
   end
 
@@ -49,7 +56,7 @@ defmodule ButlerWeb.TodoLive.Index do
     todo = Schedules.get_todo!(id)
     {:ok, _} = Schedules.delete_todo(todo)
 
-    {:noreply, assign(socket, :todos, list_todos())}
+    {:noreply, assign(socket, :todos, list_todos(socket.assigns.current_user.id))}
   end
 
   @impl true
@@ -58,14 +65,14 @@ defmodule ButlerWeb.TodoLive.Index do
   end
 
   @impl true
-  def handle_info({:added_todo, todo}, socket) do
-    socket = update(socket, :todos, fn ts -> [todo | ts] end)
+  def handle_info({:created_todo, todo}, socket) do
+    socket = update(socket, :todos, fn todos -> [todo | todos] end)
 
     {:noreply, socket}
   end
 
-  defp list_todos do
-    Schedules.list_todos()
+  defp list_todos(user_id) do
+    Schedules.list_todos(user_id)
   end
 
   def list_week do
@@ -80,12 +87,15 @@ defmodule ButlerWeb.TodoLive.Index do
     |> Enum.reverse()
   end
 
-  defp get_priority(num) do
-    case num do
-      1 -> "None"
-      2 -> "Low"
-      3 -> "Medium"
-      4 -> "High"
-    end
+  defp group_todos_by_day(todos) when is_list(todos) do
+    Enum.group_by(todos, fn todo ->
+      Timex.to_date(todo.start)
+    end)
+  end
+
+  defp get_priority(priority) do
+    priority
+    |> Atom.to_string()
+    |> String.capitalize()
   end
 end

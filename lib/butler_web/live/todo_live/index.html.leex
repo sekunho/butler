@@ -4,6 +4,7 @@
     title: @page_title,
     action: @live_action,
     todo: @todo,
+    current_user: @current_user,
     return_to: Routes.todo_index_path(@socket, :index) %>
 <% end %>
 
@@ -15,68 +16,36 @@
         <!-- CALENDAR -->
         <div class="bg-white relative overflow-y-auto">
             <div class="bg-white w-full flex space-x-4 items-end sticky top-0 z-20 py-6 pl-6 shadow-sm">
-                <div class="flex flex-col space-y-4">
-                    <nav class="flex" aria-label="Breadcrumb">
-                        <ol class="flex items-center space-x-4">
-                            <li>
-                                <div>
-                                    <a href="#" class="text-gray-400 hover:text-gray-500">
-                                        <svg class="flex-shrink-0 h-5 w-5" xmlns="http://www.w3.org/2000/svg"
-                                            viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                            <path
-                                                d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
-                                        </svg>
-                                        <span class="sr-only">Home</span>
-                                    </a>
-                                </div>
-                            </li>
-                            <li>
-                                <div class="flex items-center">
-                                    <svg class="flex-shrink-0 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg"
-                                        viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                        <path fill-rule="evenodd"
-                                            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                    <a href="#" class="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700">
-                                        New Schedule
-                                    </a>
-                                </div>
-                            </li>
-                        </ol>
-                    </nav>
+                <div class="flex space-x-2 items-center">
+                    <span class="relative z-0 inline-flex shadow-sm rounded-md">
+                        <button type="button"
+                            class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
+                            <span class="sr-only">Previous</span>
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd"
+                                    d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                        <button type="button"
+                            class="-ml-px relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
+                            <span class="sr-only">Next</span>
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd"
+                                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </span>
 
-                    <div class="flex space-x-2 items-center">
-                        <span class="relative z-0 inline-flex shadow-sm rounded-md">
-                            <button type="button"
-                                class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
-                                <span class="sr-only">Previous</span>
-                                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                                    fill="currentColor" aria-hidden="true">
-                                    <path fill-rule="evenodd"
-                                        d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                            </button>
-                            <button type="button"
-                                class="-ml-px relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
-                                <span class="sr-only">Next</span>
-                                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                                    fill="currentColor" aria-hidden="true">
-                                    <path fill-rule="evenodd"
-                                        d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                            </button>
+                    <h3 class="text-3xl text-gray-800">
+                        <span class="font-bold font-display ml-2">
+                            <%= Timex.month_name(Timex.today() |> Map.get(:month)) %>
                         </span>
-
-                        <h3 class="text-3xl text-gray-800">
-                            <span class="font-bold font-display ml-2">
-                                <%= Timex.month_name(Timex.today() |> Map.get(:month)) %>
-                            </span>
-                            <%= Timex.today() |> Map.get(:year) %>
-                        </h3>
-                    </div>
+                        <%= Timex.today() |> Map.get(:year) %>
+                    </h3>
                 </div>
 
                 <button type="button"
@@ -100,10 +69,13 @@
                     </ul>
                 </div>
                 <div class="grid grid-cols-7 text-gray-500 divide-x w-full z-10">
+                    <% grouped_todos = group_todos_by_day(@todos) %>
+                    <% IO.inspect grouped_todos %>
                     <%= for day <- list_week() do %>
+                        <% IO.inspect day, label: "DAY" %>
                         <%= live_component @socket, DayComponent,
                             day: day,
-                            todos: [%Todo{duration: 0.5, start: 0}, %Todo{duration: 0.5, start: 0.5}] %>
+                            todos: Map.get(grouped_todos, day, []) %>
                     <% end %>
                 </div>
             </div>
@@ -122,9 +94,9 @@
                             <svg class="text-gray-500 h-5 w-5 mr-1.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            Add todo
+                            <span class="underline">N</span>ew todo
                         <% end %>
-                        <ul class="space-y-2">
+                        <ul class="space-y-2 py-6">
                             <%= case @todos do %>
                                 <% [] -> %>
                                     <div class="mt-24 mx-auto flex items-center justify-center h-24 w-24">
@@ -146,25 +118,22 @@
                                 <% [_ | _] -> %>
                                     <%= for todo <- @todos do %>
                                         <li class="bg-white rounded-md cursor-pointer py-4 flex justify-between hover:shadow-md px-1.5 border border-gray-300">
-                                            <div class="ml-3">
-                                                <p class="text-sm font-medium text-gray-900"><%= todo["name"] %></p>
-                                                <div class="mt-2 flex items-center text-sm text-gray-500 space-x-2">
-                                                    <div class="flex items-center">
-                                                        <svg class="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                        </svg>
-                                                        <span class="truncate"><%= todo["duration"] %> minutes</span>
+                                            <%= live_patch to: Routes.todo_index_path(@socket, :edit, todo), class: "w-full" do %>
+                                                <div class="ml-3">
+                                                    <p class="text-sm font-medium text-gray-900"><%= todo.name %></p>
+                                                    <div class="mt-2 flex items-center text-sm text-gray-500 space-x-2">
+                                                        <div class="flex items-center">
+                                                            <svg class="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                            </svg>
+                                                            <span class="truncate"><%= todo.duration %> minutes</span>
+                                                        </div>
+                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-pink-100 text-pink-800">
+                                                            <%= get_priority(todo.priority) %>
+                                                        </span>
                                                     </div>
-                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-pink-100 text-pink-800">
-                                                        <%= get_priority(todo["priority"]) %>
-                                                    </span>
                                                 </div>
-                                            </div>
-                                            <button type="button" class="items-center px-2.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                                <svg class="h-3.5 w-3.5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                                </svg>
-                                            </button>
+                                            <% end %>
                                         </li>
                                     <% end %>
                             <% end %>

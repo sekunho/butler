@@ -8,6 +8,20 @@ defmodule Butler.Schedules do
 
   alias Butler.Schedules.Todo
 
+  def subscribe(topic) do
+    Phoenix.PubSub.subscribe(Butler.PubSub, topic)
+  end
+
+  defp broadcast({:ok, todo}, event) do
+    # Broadcast changes only to the users that can see it.
+    todo_topic = IO.iodata_to_binary(["todos:", todo.user_id])
+    Phoenix.PubSub.broadcast(Butler.PubSub, todo_topic, {event, todo})
+
+    {:ok, todo}
+  end
+
+  defp broadcast({:error, _changeset} = error, _event), do: error
+
   @doc """
   Returns the list of todos.
 
@@ -17,8 +31,13 @@ defmodule Butler.Schedules do
       [%Todo{}, ...]
 
   """
-  def list_todos do
-    Repo.all(Todo)
+  def list_todos(user_id) do
+    query =
+      from t in Todo,
+      where: t.user_id == ^user_id,
+      order_by: [desc: t.inserted_at]
+
+    Repo.all(query)
   end
 
   @doc """
@@ -45,14 +64,26 @@ defmodule Butler.Schedules do
       iex> create_todo(%{field: value})
       {:ok, %Todo{}}
 
+      iex> create_todo(%{field: value}, [:user])
+      {:ok, %Todo{user: %User{}}}
+
       iex> create_todo(%{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_todo(attrs \\ %{}) do
-    %Todo{}
-    |> Todo.changeset(attrs)
-    |> Repo.insert()
+  def create_todo(attrs \\ %{}, preload_opts \\ []) do
+    maybe_todo =
+      %Todo{}
+      |> Todo.changeset(attrs)
+      |> Repo.insert()
+
+    case maybe_todo do
+      {:ok, todo} ->
+        broadcast({:ok, Repo.preload(todo, preload_opts)}, :created_todo)
+
+      error_changeset_pair ->
+        broadcast(error_changeset_pair, :created_todo)
+    end
   end
 
   @doc """

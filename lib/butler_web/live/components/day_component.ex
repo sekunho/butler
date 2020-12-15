@@ -21,21 +21,24 @@ defmodule ButlerWeb.DayComponent do
                 <li class="w-full h-0.5 bg-red-600 absolute z-10" style="margin-top: calc(3.25rem * 14);"></li>
             <% end %>
             <%= for todo <- @todos do %>
-            <li class="absolute w-full bg-indigo-500 px-1 rounded cursor-pointer select-none hover:shadow-lg text-white"
-                style="height: calc(3.25rem * <%= todo.duration %>); margin-top: calc(3.25rem * <%= todo.start %>);">
+            <li class="border border-indigo-600 absolute w-full bg-indigo-500 px-1 rounded cursor-pointer select-none hover:bg-indigo-600 text-white"
+                style="height: calc(3.25rem * <%= todo.duration / 60 %>); margin-top: calc(3.25rem * <%= get_time_offset(todo.start) %>);">
                 <p class="text-xs font-medium truncate">
-                    <span>
-                        Continue with final project
-                    </span>
-                    <span class="ml-1.5">
-                        0:00
-                    </span>
+                    <span><%= todo.name %></span>
+                    <span class="ml-1.5">(<%= DateTime.to_time(todo.start) %>)</span>
                 </p>
             </li>
             <% end %>
         </ul>
     </div>
     """
+  end
+
+  defp get_time_offset(datetime) do
+    time = DateTime.to_time(datetime)
+
+    # TODO: Fix issue with types. Not sure what exactly. I don't get dialyzer.
+    Timex.diff(time, ~T[00:00:00], :second) / 3600
   end
 
   defp get_day_name(date), do: Date.day_of_week(date) |> Timex.day_shortname()
