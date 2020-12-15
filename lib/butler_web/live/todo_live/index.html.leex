@@ -49,7 +49,8 @@
                 </div>
 
                 <button type="button"
-                    class="inline-flex items-center p-3 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-full text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    phx-click="run_scheduler"
+                    class="inline-flex items-center p-3 border border-indigo-500 shadow-sm text-sm leading-4 font-medium rounded-full text-indigo-600 bg-white hover:bg-indigo-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                     <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -61,20 +62,23 @@
             <div class="flex pt-6 pl-4">
                 <div class="pt-12">
                     <ul class="timeline text-sm text-gray-500 mr-4">
-                    <%= for hour <- 0..23 do %>
-                        <li>
-                        <span><%= IO.iodata_to_binary([Integer.to_string(hour), ":00"]) %></span>
-                        </li>
-                    <% end %>
+                        <%= for hour <- 0..23 do %>
+                            <li>
+                                <span>
+                                    <%= IO.iodata_to_binary([Integer.to_string(hour), ":00"]) %>
+                                </span>
+                            </li>
+                        <% end %>
                     </ul>
                 </div>
                 <div class="grid grid-cols-7 text-gray-500 divide-x w-full z-10">
                     <% grouped_todos = group_todos_by_day(@todos) %>
-                    <% IO.inspect grouped_todos %>
+                    <% grouped_avail_slots = group_available_by_day(sample_streaks()) %>
+
                     <%= for day <- list_week() do %>
-                        <% IO.inspect day, label: "DAY" %>
                         <%= live_component @socket, DayComponent,
                             day: day,
+                            slots: Map.get(grouped_avail_slots, day, []),
                             todos: Map.get(grouped_todos, day, []) %>
                     <% end %>
                 </div>

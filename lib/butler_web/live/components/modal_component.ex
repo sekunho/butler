@@ -27,6 +27,8 @@ defmodule ButlerWeb.ModalComponent do
 
   @impl true
   def handle_event("close", _, socket) do
+    send(self(), :run_scheduler)
+
     {:noreply, push_patch(socket, to: socket.assigns.return_to)}
   end
 end

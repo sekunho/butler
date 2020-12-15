@@ -56,7 +56,9 @@ defmodule ButlerWeb.TodoLive.Index do
     todo = Schedules.get_todo!(id)
     {:ok, _} = Schedules.delete_todo(todo)
 
-    {:noreply, assign(socket, :todos, list_todos(socket.assigns.current_user.id))}
+    todos = run_scheduler(socket.assigns.current_user.id)
+
+    {:noreply, assign(socket, :todos, todos)}
   end
 
   @impl true
@@ -65,10 +67,36 @@ defmodule ButlerWeb.TodoLive.Index do
   end
 
   @impl true
+  def handle_event("run_scheduler", _params, socket) do
+    todos = run_scheduler(socket.assigns.current_user.id)
+
+    {:noreply,
+      socket
+      |> assign(:todos, todos)
+      |> put_flash(:info, "I've rescheduled your calendar! 🤵")}
+  end
+
+  @impl true
   def handle_info({:created_todo, todo}, socket) do
     socket = update(socket, :todos, fn todos -> [todo | todos] end)
 
     {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info(:run_scheduler, socket) do
+    send(self(), :close_modal)
+    todos = run_scheduler(socket.assigns.current_user.id)
+
+    {:noreply, assign(socket, :todos, todos)}
+  end
+
+  defp run_scheduler(user_id) do
+    user_id
+    |> Schedules.list_todos()
+    |> Schedules.auto_assign()
+
+    Schedules.list_todos(user_id)
   end
 
   defp list_todos(user_id) do
@@ -93,9 +121,29 @@ defmodule ButlerWeb.TodoLive.Index do
     end)
   end
 
+  defp group_available_by_day(avail_slots) when is_list(avail_slots) do
+    Enum.group_by(avail_slots, fn {start, _} ->
+      Timex.to_date(start)
+    end)
+  end
+
   defp get_priority(priority) do
     priority
     |> Atom.to_string()
     |> String.capitalize()
+  end
+
+  # TODO: Remove when user-defined available slots are implemented.
+  defp sample_streaks do
+    [{~N[2020-12-15 09:00:00.00], ~N[2020-12-15 12:00:00.00]},
+      {~N[2020-12-15 13:00:00.00], ~N[2020-12-15 20:00:00.00]},
+      {~N[2020-12-16 09:00:00.00], ~N[2020-12-16 12:00:00.00]},
+      {~N[2020-12-16 13:00:00.00], ~N[2020-12-16 20:00:00.00]},
+      {~N[2020-12-17 09:00:00.00], ~N[2020-12-17 12:00:00.00]},
+      {~N[2020-12-17 13:00:00.00], ~N[2020-12-17 15:00:00.00]},
+      {~N[2020-12-18 09:00:00.00], ~N[2020-12-18 12:00:00.00]},
+      {~N[2020-12-18 13:00:00.00], ~N[2020-12-18 20:00:00.00]},
+      {~N[2020-12-19 09:00:00.00], ~N[2020-12-19 12:00:00.00]},
+      {~N[2020-12-19 13:00:00.00], ~N[2020-12-19 20:00:00.00]}]
   end
 end
