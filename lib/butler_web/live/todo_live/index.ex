@@ -56,7 +56,9 @@ defmodule ButlerWeb.TodoLive.Index do
     todo = Schedules.get_todo!(id)
     {:ok, _} = Schedules.delete_todo(todo)
 
-    {:noreply, assign(socket, :todos, list_todos(socket.assigns.current_user.id))}
+    todos = run_scheduler(socket.assigns.current_user.id)
+
+    {:noreply, assign(socket, :todos, todos)}
   end
 
   @impl true
