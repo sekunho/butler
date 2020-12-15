@@ -12,7 +12,7 @@ defmodule ButlerWeb.DayComponent do
         </div>
         <ul class="mt-4 relative">
             <%= if is_disabled?(@day) do %>
-                <li class="absolute w-full bg-gray-400 opacity-20 z-10 cursor-not-allowed select-none text-white"
+                <li class="absolute w-full bg-gray-300 opacity-20 z-10 cursor-not-allowed select-none text-white"
                     style="height: calc(3.25rem * 24);">
                 </li>
             <% end %>
@@ -22,7 +22,7 @@ defmodule ButlerWeb.DayComponent do
             <% end %>
 
             <%= for {from, to} <- @slots do %>
-                <li class="absolute w-full bg-green-300 opacity-20"
+                <li class="absolute w-full bg-green-200 opacity-20"
                     style="margin-top: calc(3.25rem * <%= get_time_offset(from) %>); height: calc(3.25rem * <%= get_slot_length(from, to) %>);">
                 </li>
             <% end %>
