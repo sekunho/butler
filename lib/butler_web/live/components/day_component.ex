@@ -36,6 +36,8 @@ defmodule ButlerWeb.DayComponent do
 
   defp get_time_offset(datetime) do
     time = DateTime.to_time(datetime)
+
+    # TODO: Fix issue with types. Not sure what exactly. I don't get dialyzer.
     Timex.diff(time, ~T[00:00:00], :second) / 3600
   end
 
