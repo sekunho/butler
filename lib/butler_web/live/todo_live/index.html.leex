@@ -61,20 +61,23 @@
             <div class="flex pt-6 pl-4">
                 <div class="pt-12">
                     <ul class="timeline text-sm text-gray-500 mr-4">
-                    <%= for hour <- 0..23 do %>
-                        <li>
-                        <span><%= IO.iodata_to_binary([Integer.to_string(hour), ":00"]) %></span>
-                        </li>
-                    <% end %>
+                        <%= for hour <- 0..23 do %>
+                            <li>
+                                <span>
+                                    <%= IO.iodata_to_binary([Integer.to_string(hour), ":00"]) %>
+                                </span>
+                            </li>
+                        <% end %>
                     </ul>
                 </div>
                 <div class="grid grid-cols-7 text-gray-500 divide-x w-full z-10">
                     <% grouped_todos = group_todos_by_day(@todos) %>
-                    <% IO.inspect grouped_todos %>
+                    <% grouped_avail_slots = group_available_by_day(sample_streaks()) %>
+
                     <%= for day <- list_week() do %>
-                        <% IO.inspect day, label: "DAY" %>
                         <%= live_component @socket, DayComponent,
                             day: day,
+                            slots: Map.get(grouped_avail_slots, day, []),
                             todos: Map.get(grouped_todos, day, []) %>
                     <% end %>
                 </div>

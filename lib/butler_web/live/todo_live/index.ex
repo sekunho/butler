@@ -93,9 +93,29 @@ defmodule ButlerWeb.TodoLive.Index do
     end)
   end
 
+  defp group_available_by_day(avail_slots) when is_list(avail_slots) do
+    Enum.group_by(avail_slots, fn {start, _} ->
+      Timex.to_date(start)
+    end)
+  end
+
   defp get_priority(priority) do
     priority
     |> Atom.to_string()
     |> String.capitalize()
+  end
+
+  # TODO: Remove when user-defined available slots are implemented.
+  defp sample_streaks do
+    [{~N[2020-12-15 09:00:00.00], ~N[2020-12-15 12:00:00.00]},
+      {~N[2020-12-15 13:00:00.00], ~N[2020-12-15 20:00:00.00]},
+      {~N[2020-12-16 09:00:00.00], ~N[2020-12-16 12:00:00.00]},
+      {~N[2020-12-16 13:00:00.00], ~N[2020-12-16 20:00:00.00]},
+      {~N[2020-12-17 09:00:00.00], ~N[2020-12-17 12:00:00.00]},
+      {~N[2020-12-17 13:00:00.00], ~N[2020-12-17 15:00:00.00]},
+      {~N[2020-12-18 09:00:00.00], ~N[2020-12-18 12:00:00.00]},
+      {~N[2020-12-18 13:00:00.00], ~N[2020-12-18 20:00:00.00]},
+      {~N[2020-12-19 09:00:00.00], ~N[2020-12-19 12:00:00.00]},
+      {~N[2020-12-19 13:00:00.00], ~N[2020-12-19 20:00:00.00]}]
   end
 end
