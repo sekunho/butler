@@ -20,8 +20,7 @@ RUN \
 RUN ln -s /usr/include/locale.h /usr/include/xlocale.h
 
 # Set exposed ports
-ENV MIX_ENV=prod
-ENV MATREX_BLAS=openblas
+ENV MIX_ENV=prod MATREX_BLAS=openblas
 
 # Cache elixir deps
 ADD mix.exs mix.lock ./
@@ -43,8 +42,40 @@ RUN cd assets/ && \
 
 FROM bitwalker/alpine-elixir:latest
 
+# RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/testing/" >> /etc/apk/repositories
+# # Install `matrex` dependencies.
+# RUN \
+#     apk --no-cache --update add \
+#     erlang-dev \
+#     build-base \
+#     gcc \
+#     lapack \
+#     lapack-dev \
+#     musl \
+#     libgfortran \
+#     openblas-dev \
+#     openblas && \
+#     rm -rf /var/cache/apk/*
+
+# RUN ln -s /usr/include/locale.h /usr/include/xlocale.h
+
 EXPOSE 4000
 ENV PORT=4000 MIX_ENV=prod
+
+RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/testing/" >> /etc/apk/repositories
+# Install `matrex` dependencies.
+RUN \
+    apk --no-cache --update add \
+    erlang-dev \
+    build-base \
+    gcc \
+    lapack \
+    lapack-dev \
+    musl \
+    libgfortran \
+    openblas-dev \
+    openblas && \
+    rm -rf /var/cache/apk/*
 
 COPY --from=phx-builder /opt/app/_build /opt/app/_build
 COPY --from=phx-builder /opt/app/priv /opt/app/priv
