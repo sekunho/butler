@@ -21,11 +21,11 @@ defmodule ButlerWeb.DayComponent do
                 <li class="w-full h-0.5 bg-red-600 absolute z-10" style="margin-top: calc(3.25rem * 14);"></li>
             <% end %>
             <%= for todo <- @todos do %>
-            <li class="border border-indigo-700 absolute w-full bg-indigo-500 px-1 rounded cursor-pointer select-none hover:bg-indigo-700 text-white"
+            <li class="border border-indigo-600 absolute w-full bg-indigo-500 px-1 rounded cursor-pointer select-none hover:bg-indigo-600 text-white"
                 style="height: calc(3.25rem * <%= todo.duration / 60 %>); margin-top: calc(3.25rem * <%= get_time_offset(todo.start) %>);">
                 <p class="text-xs font-medium truncate">
                     <span><%= todo.name %></span>
-                    <span class="ml-1.5"><%= DateTime.to_time(todo.start) %></span>
+                    <span class="ml-1.5">(<%= DateTime.to_time(todo.start) %>)</span>
                 </p>
             </li>
             <% end %>
