@@ -53,7 +53,7 @@ defmodule Butler.MixProject do
       {:timex, "~> 3.5"},
       {:canada, "~> 2.0"},
       {:mix_test_watch, "~> 1.0", only: :dev, runtime: false},
-      {:scheduler, git: "https://github.com/butlerph/scheduler.git", tag: "0.1"}
+      {:scheduler, git: "https://github.com/butlerph/scheduler.git", tag: "0.2.1-hotfix2"}
     ]
   end
 
