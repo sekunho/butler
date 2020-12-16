@@ -17,11 +17,40 @@ import { Socket } from "phoenix"
 import NProgress from "nprogress"
 import { LiveSocket } from "phoenix_live_view"
 
+let selectedSlots = []
+
 let Hooks = {}
 Hooks.TimeSlots = {
     mounted() {
-        // TODO: Send data of selected slots to server once `mouseup` occurs.
-        highlightSlots(this.el.id)
+        let slots = document.getElementsByClassName('time-slot')
+        let isDown = false
+
+        for (let x = 0; x < slots.length; x++) {
+            slots[x].addEventListener("mousedown", (e) => {
+                toggleSlot(e.target, selectedSlots)
+
+                isDown = true
+            })
+
+            slots[x].addEventListener("mouseenter", (e) => {
+                if (isDown) {
+                    const elem = e.target.closest(".time-slot");
+
+                    if (elem) {
+                        toggleSlot(elem, selectedSlots)
+                    }
+                }
+            }, false)
+
+            document.addEventListener("mouseup", (e) => {
+                if (isDown) {
+                    isDown = false
+
+                    // Send list of selected slots to the server
+                    this.pushEvent("update-time-slots", { "hey": "world" })
+                }
+            })
+        }
     }
 }
 
@@ -44,32 +73,23 @@ liveSocket.connect()
 // >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket
 
-function highlightSlots() {
-    let slots = document.getElementsByClassName('time-slot')
-    console.log(slots.length)
-    let isDown = false
+function toggleSlot(slotEl, selectedSlots) {
+    slotEl.classList.toggle("bg-green-300")
 
-    for (let x = 0; x < slots.length; x++) {
-        slots[x].addEventListener("mousedown", function () {
-            let hasClass = this.classList.contains("bg-green-500")
-            this.classList.toggle("bg-green-500")
+    const isSelected = slotEl.classList.contains("bg-green-300")
+    const day = slotEl.getAttribute("phx-value-day")
+    const slot = slotEl.getAttribute("phx-value-slot")
+    const slotVal = { "day": day, "slot": slot }
 
-            isDown = true
+    if (isSelected) {
+        selectedSlots.push(slotVal)
+    } else {
+        const ndx = selectedSlots.findIndex((el, index) => {
+            return JSON.stringify(el) == JSON.stringify(slotVal)
         })
 
-        slots[x].addEventListener("mouseover", (e) => mdownHandler(e, isDown), false)
-        document.addEventListener("mouseup", function () {
-            isDown = false
-            slots[x].removeEventListener("mouseover", mdownHandler)
-        })
-    }
-}
-
-function mdownHandler(e, isDown) {
-    if (isDown) {
-        var elem = e.target.closest(".time-slot");
-        if (elem) {
-            e.target.classList.toggle("bg-green-500")
+        if (ndx > -1) {
+            selectedSlots.splice(ndx, 1)
         }
     }
 }

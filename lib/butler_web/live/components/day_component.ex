@@ -3,7 +3,7 @@ defmodule ButlerWeb.DayComponent do
 
   def render(assigns) do
     ~L"""
-    <div id="<%= @id %>" phx-hook="TimeSlots">
+    <div>
         <div class="day-header">
             <h5 class="day-header__name"><%= get_day_name(@date) %></h5>
             <span class="day-header__number <%= if is_today?(@date), do: "day-header__number--active", else: "" %>">
@@ -38,7 +38,7 @@ defmodule ButlerWeb.DayComponent do
                 <% end %>
             <% else %>
                 <%= for offset <- 0..47 do %>
-                    <li class="time-slot absolute w-full border-b" draggable="false" phx-click="toggle-slot" phx-value-id="<%= "#{@id}" %>" phx-value-slot="<%= offset %>"
+                    <li class="time-slot absolute w-full border-b" draggable="false" phx-click="toggle-slot" phx-value-day="<%= @id %>" phx-value-slot="<%= offset %>"
                         style="margin-top: calc(3.25rem * <%= 0.5 * offset %>); height: calc(3.25rem * 0.5);">
                     </li>
                 <% end %>

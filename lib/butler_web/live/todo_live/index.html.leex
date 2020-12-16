@@ -79,7 +79,7 @@
                         <% end %>
                     </ul>
                 </div>
-                <div class="grid grid-cols-7 text-gray-500 divide-x w-full z-10">
+                <div id="calendar" class="grid grid-cols-7 text-gray-500 divide-x w-full z-10" phx-hook="TimeSlots">
                     <% grouped_todos = group_todos_by_day(@todos) %>
                     <% grouped_avail_slots = group_available_by_day(sample_streaks()) %>
 
