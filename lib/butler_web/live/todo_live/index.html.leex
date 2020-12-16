@@ -49,9 +49,8 @@
                 </div>
 
                 <button type="button"
-                    phx-click="run_scheduler"
+                    phx-click="to_select_mode"
                     class="inline-flex items-center p-3 border border-indigo-500 shadow-sm text-sm leading-4 font-medium rounded-full text-indigo-600 bg-white hover:bg-indigo-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-
                     <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                     </svg>
@@ -70,12 +69,12 @@
 
             <div class="flex pt-6 pl-4">
                 <div class="pt-12">
-                    <ul class="timeline text-sm text-gray-500 mr-4">
-                        <%= for hour <- 0..23 do %>
+                    <ul draggable="false" class="timeline text-sm text-gray-500 mr-4 mt-4">
+                        <%= for hour <- 0..24 do %>
                             <li>
-                                <span>
-                                    <%= IO.iodata_to_binary([Integer.to_string(hour), ":00"]) %>
-                                </span>
+                                <%= if hour != 24 do %>
+                                    <%= "#{hour}:00" %>
+                                <% end %>
                             </li>
                         <% end %>
                     </ul>
@@ -84,11 +83,13 @@
                     <% grouped_todos = group_todos_by_day(@todos) %>
                     <% grouped_avail_slots = group_available_by_day(sample_streaks()) %>
 
-                    <%= for day <- list_week() do %>
+                    <%= for date <- list_week() do %>
                         <%= live_component @socket, DayComponent,
-                            day: day,
-                            slots: Map.get(grouped_avail_slots, day, []),
-                            todos: Map.get(grouped_todos, day, []) %>
+                            date: date,
+                            id: date.day,
+                            mode: @mode,
+                            slots: Map.get(grouped_avail_slots, date, []),
+                            todos: Map.get(grouped_todos, date, []) %>
                     <% end %>
                 </div>
             </div>

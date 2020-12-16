@@ -17,9 +17,18 @@ import { Socket } from "phoenix"
 import NProgress from "nprogress"
 import { LiveSocket } from "phoenix_live_view"
 
+let Hooks = {}
+Hooks.TimeSlots = {
+    mounted() {
+        // TODO: Send data of selected slots to server once `mouseup` occurs.
+        highlightSlots(this.el.id)
+    }
+}
+
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, {
-    params: { _csrf_token: csrfToken }
+    params: { _csrf_token: csrfToken },
+    hooks: Hooks,
 })
 
 // Show progress bar on live navigation and form submits
@@ -35,3 +44,32 @@ liveSocket.connect()
 // >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket
 
+function highlightSlots() {
+    let slots = document.getElementsByClassName('time-slot')
+    console.log(slots.length)
+    let isDown = false
+
+    for (let x = 0; x < slots.length; x++) {
+        slots[x].addEventListener("mousedown", function () {
+            let hasClass = this.classList.contains("bg-green-500")
+            this.classList.toggle("bg-green-500")
+
+            isDown = true
+        })
+
+        slots[x].addEventListener("mouseover", (e) => mdownHandler(e, isDown), false)
+        document.addEventListener("mouseup", function () {
+            isDown = false
+            slots[x].removeEventListener("mouseover", mdownHandler)
+        })
+    }
+}
+
+function mdownHandler(e, isDown) {
+    if (isDown) {
+        var elem = e.target.closest(".time-slot");
+        if (elem) {
+            e.target.classList.toggle("bg-green-500")
+        }
+    }
+}

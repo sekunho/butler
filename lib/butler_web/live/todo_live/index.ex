@@ -24,7 +24,13 @@ defmodule ButlerWeb.TodoLive.Index do
           |> push_redirect(to: Routes.user_session_path(socket, :new))
         }
 
-      %User{id: user_id} -> {:ok, assign(socket, :todos, list_todos(user_id)), temporary_assigns: []}
+      %User{id: user_id} ->
+        socket =
+          socket
+          |> assign(:todos, list_todos(user_id))
+          |> assign(:mode, :visual)
+
+        {:ok, socket, temporary_assigns: []}
     end
   end
 
@@ -74,6 +80,17 @@ defmodule ButlerWeb.TodoLive.Index do
       socket
       |> assign(:todos, todos)
       |> put_flash(:info, "I've rescheduled your calendar! 🤵")}
+  end
+
+  @impl true
+  def handle_event("to_select_mode", _params, socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("toggle-slot", params, socket) do
+    IO.inspect params, label: "TOGGLED"
+    {:noreply, socket}
   end
 
   @impl true

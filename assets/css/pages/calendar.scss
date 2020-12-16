@@ -5,7 +5,7 @@
 .timeline li::after {
   @apply absolute left-0 w-full bg-gray-200;
 }
-  
+
 .timeline li::after {
   content: '';
   height: 1px;

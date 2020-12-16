@@ -3,38 +3,45 @@ defmodule ButlerWeb.DayComponent do
 
   def render(assigns) do
     ~L"""
-    <div>
+    <div id="<%= @id %>" phx-hook="TimeSlots">
         <div class="day-header">
-            <h5 class="day-header__name"><%= get_day_name(@day) %></h5>
-            <span class="day-header__number <%= if is_today?(@day), do: "day-header__number--active", else: "" %>">
-                <%= get_day_num(@day) %>
+            <h5 class="day-header__name"><%= get_day_name(@date) %></h5>
+            <span class="day-header__number <%= if is_today?(@date), do: "day-header__number--active", else: "" %>">
+                <%= get_day_num(@date) %>
             </span>
         </div>
-        <ul class="mt-4 relative">
-            <%= if is_disabled?(@day) do %>
-                <li class="absolute w-full bg-gray-300 opacity-20 z-10 cursor-not-allowed select-none text-white"
+        <ul class="relative mt-8">
+            <%= if is_disabled?(@date) do %><!--
+                <li class="absolute w-full bg-red-300 opacity-20 z-10 cursor-not-allowed select-none text-white"
                     style="height: calc(3.25rem * 24);">
-                </li>
+                </li> -->
             <% end %>
 
-            <%= if is_today?(@day) do %>
+            <%= if is_today?(@date) do %>
                 <li class="w-full h-0.5 bg-red-600 absolute z-10" style="margin-top: calc(3.25rem * <%= get_time_offset(Timex.now()) %>);"></li>
             <% end %>
 
-            <%= for {from, to} <- @slots do %>
-                <li class="absolute w-full bg-green-200 opacity-20"
-                    style="margin-top: calc(3.25rem * <%= get_time_offset(from) %>); height: calc(3.25rem * <%= get_slot_length(from, to) %>);">
-                </li>
-            <% end %>
-
-            <%= for todo <- @todos do %>
-                <li class="border border-indigo-600 absolute w-full bg-indigo-500 px-1 rounded cursor-pointer select-none hover:bg-indigo-600 text-white"
-                    style="height: calc(3.25rem * <%= todo.duration / 60 %>); margin-top: calc(3.25rem * <%= get_time_offset(todo.start) %>);">
-                    <p class="text-xs font-medium truncate">
-                        <span><%= todo.name %></span>
-                        <span class="ml-1.5">(<%= DateTime.to_time(todo.start) %>)</span>
-                    </p>
-                </li>
+            <%= if @mode == :select do %>
+                <%= for {from, to} <- @slots do %>
+                    <li class="absolute w-full bg-green-200 opacity-20"
+                        style="margin-top: calc(3.25rem * <%= get_time_offset(from) %>); height: calc(3.25rem * <%= get_slot_length(from, to) %>);">
+                    </li>
+                <% end %>
+                <%= for todo <- @todos do %>
+                    <li class="border border-indigo-600 absolute w-full bg-indigo-500 px-1 rounded cursor-pointer select-none hover:bg-indigo-600 text-white"
+                        style="height: calc(3.25rem * <%= todo.duration / 60 %>); margin-top: calc(3.25rem * <%= get_time_offset(todo.start) %>);">
+                        <p class="text-xs font-medium truncate">
+                            <span><%= todo.name %></span>
+                            <span class="ml-1.5">(<%= DateTime.to_time(todo.start) %>)</span>
+                        </p>
+                    </li>
+                <% end %>
+            <% else %>
+                <%= for offset <- 0..47 do %>
+                    <li class="time-slot absolute w-full border-b" draggable="false" phx-click="toggle-slot" phx-value-id="<%= "#{@id}" %>" phx-value-slot="<%= offset %>"
+                        style="margin-top: calc(3.25rem * <%= 0.5 * offset %>); height: calc(3.25rem * 0.5);">
+                    </li>
+                <% end %>
             <% end %>
         </ul>
     </div>
