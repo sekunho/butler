@@ -47,10 +47,15 @@ Hooks.TimeSlots = {
                     isDown = false
 
                     // Send list of selected slots to the server
-                    this.pushEvent("update-time-slots", { "hey": "world" })
+                    this.pushEvent("update_time_slots", { "selected_slots": selectedSlots })
                 }
             })
         }
+
+        // Update local copy of selected slots.
+        this.handleEvent("refresh_local_slots", ({ selected_slots }) => {
+            selectedSlots = selected_slots
+        })
     }
 }
 
@@ -74,9 +79,9 @@ liveSocket.connect()
 window.liveSocket = liveSocket
 
 function toggleSlot(slotEl, selectedSlots) {
-    slotEl.classList.toggle("bg-green-300")
+    slotEl.classList.toggle("bg-green-200")
 
-    const isSelected = slotEl.classList.contains("bg-green-300")
+    const isSelected = slotEl.classList.contains("bg-green-200")
     const day = slotEl.getAttribute("phx-value-day")
     const slot = slotEl.getAttribute("phx-value-slot")
     const slotVal = { "day": day, "slot": slot }

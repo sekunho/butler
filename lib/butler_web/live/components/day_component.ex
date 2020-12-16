@@ -38,7 +38,7 @@ defmodule ButlerWeb.DayComponent do
                 <% end %>
             <% else %>
                 <%= for offset <- 0..47 do %>
-                    <li class="time-slot absolute w-full border-b" draggable="false" phx-click="toggle-slot" phx-value-day="<%= @id %>" phx-value-slot="<%= offset %>"
+                    <li class="time-slot absolute w-full border-b" draggable="false" phx-click="toggle-slot" phx-value-day="<%= @id %>" phx-value-slot="<%= offset * 0.5 %>"
                         style="margin-top: calc(3.25rem * <%= 0.5 * offset %>); height: calc(3.25rem * 0.5);">
                     </li>
                 <% end %>

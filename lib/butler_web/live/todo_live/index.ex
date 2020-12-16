@@ -88,9 +88,10 @@ defmodule ButlerWeb.TodoLive.Index do
   end
 
   @impl true
-  def handle_event("update-time-slots", params, socket) do
+  def handle_event("update_time_slots", params, socket) do
     IO.inspect params
-    {:noreply, socket}
+
+    {:noreply, push_event(socket, "refresh_local_slots", params)}
   end
 
   @impl true
