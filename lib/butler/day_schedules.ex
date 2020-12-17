@@ -51,10 +51,13 @@ defmodule Butler.DaySchedules do
 
   """
   def create_day(attrs \\ %{}) do
-
     %Day{}
     |> Day.changeset(attrs)
-    |> Repo.insert(on_conflict: :nothing, conflict_target: [:user_id, :date], returning: true)
+    |> Repo.insert(
+      on_conflict: [set: [updated_at: Timex.now]],
+      conflict_target: [:user_id, :date],
+      returning: true
+    )
   end
 
   @doc """
