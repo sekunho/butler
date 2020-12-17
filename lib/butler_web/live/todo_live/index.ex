@@ -95,12 +95,6 @@ defmodule ButlerWeb.TodoLive.Index do
   end
 
   @impl true
-  def handle_event("toggle-slot", params, socket) do
-    IO.inspect params, label: "TOGGLED"
-    {:noreply, socket}
-  end
-
-  @impl true
   def handle_info({:created_todo, todo}, socket) do
     socket = update(socket, :todos, fn todos -> [todo | todos] end)
 
