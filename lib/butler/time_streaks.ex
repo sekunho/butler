@@ -144,13 +144,18 @@ defmodule Butler.TimeStreaks do
 
     Enum.reduce(sorted_slots, [], fn
       slot_b, [] ->
-        [%__MODULE__{from: slot_b, to: slot_b}]
+        [%__MODULE__{
+          from: slot_b,
+          to: Time.add(slot_b, trunc(@max_interval * 60), :second)
+        }]
 
       slot_b, [%__MODULE__{to: to} = prev_streak | other_streaks] = streaks ->
+        new_to = Time.add(slot_b, trunc(@max_interval * 60), :second)
+
         if Time.diff(slot_b, to, :second) / 60 <= @max_interval do
-          [Map.put(prev_streak, :to, slot_b) | other_streaks]
+          [Map.put(prev_streak, :to, new_to) | other_streaks]
         else
-          [%__MODULE__{from: slot_b, to: slot_b} | streaks]
+          [%__MODULE__{from: slot_b, to: new_to} | streaks]
         end
     end)
     |> Enum.reverse()

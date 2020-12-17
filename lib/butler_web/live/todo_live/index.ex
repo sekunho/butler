@@ -92,7 +92,10 @@ defmodule ButlerWeb.TodoLive.Index do
   def handle_event("update_time_slots", %{"selected_slots" => slots} = params, socket) do
     # TODO: Store time slots as streaks of time in database.
     ## Consider the cases, shrinking both ends, and breaking a time slot
-    IO.inspect(TimeStreaks.parse(slots))
+    grouped_streaks =
+      slots
+      |> TimeStreaks.from_unparsed_slots()
+      |> IO.inspect
 
     {:noreply, push_event(socket, "refresh_local_slots", params)}
   end
