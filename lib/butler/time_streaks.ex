@@ -8,6 +8,14 @@ defmodule Butler.TimeStreaks do
 
   alias Butler.TimeStreaks.Streak
 
+  @type t() :: %__MODULE__{
+    from: Time.t(),
+    to: Time.t()
+  }
+
+  @enforce_keys [:from, :to]
+  defstruct [:from, :to]
+
   @doc """
   Returns the list of streaks.
 
@@ -100,5 +108,51 @@ defmodule Butler.TimeStreaks do
   """
   def change_streak(%Streak{} = streak, attrs \\ %{}) do
     Streak.changeset(streak, attrs)
+  end
+
+  def from_unparsed_slots(unparsed_slots) when is_list(unparsed_slots) do
+    # TODO: Remove duplicate values
+    # TODO: Ensure time is always in :15, :30, :00
+    # Group slots according to common date
+    grouped_slots =
+      Enum.reduce(unparsed_slots, %{}, fn
+        %{"day" => date, "slot" => time}, acc ->
+          {:ok, date} =
+            [date, "T", "00:00:00+00:00"]
+            |> IO.iodata_to_binary()
+            |> Timex.parse("{ISO:Extended}")
+
+          {:ok, time} = Time.from_iso8601(time)
+
+          Map.update(acc, date, [time], fn slots ->
+            [time | slots]
+          end )
+      end)
+      |> Enum.into([])
+
+
+    Enum.reduce(grouped_slots, %{}, fn {day, slots}, acc ->
+      streaks = slots_to_streak(slots)
+
+      Map.put_new(acc, day, streaks)
+    end)
+  end
+
+  @max_interval 30.0
+  def slots_to_streak(slots) when is_list(slots) do
+    sorted_slots = Enum.sort(slots, &Timex.before?/2)
+
+    Enum.reduce(sorted_slots, [], fn
+      slot_b, [] ->
+        [%__MODULE__{from: slot_b, to: slot_b}]
+
+      slot_b, [%__MODULE__{to: to} = prev_streak | other_streaks] = streaks ->
+        if Time.diff(slot_b, to, :second) / 60 <= @max_interval do
+          [Map.put(prev_streak, :to, slot_b) | other_streaks]
+        else
+          [%__MODULE__{from: slot_b, to: slot_b} | streaks]
+        end
+    end)
+    |> Enum.reverse()
   end
 end
