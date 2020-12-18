@@ -1,6 +1,8 @@
 defmodule ButlerWeb.TodoLive.Index do
   use ButlerWeb, :live_view
 
+  alias Butler.DaySchedules
+  alias Butler.DaySchedules.Day
   alias Butler.Schedules
   alias Butler.TimeStreaks
   alias Butler.Schedules.Todo
@@ -100,8 +102,24 @@ defmodule ButlerWeb.TodoLive.Index do
     dates =
       grouped_streaks
       |> Map.keys()
-      |> Enum.map(fn date -> %{date: date, user_id: current_user.id} end)
+      |> Enum.map(fn date ->
+        # The reason the timestamps are manually specified is because Multi
+        # is pretty low-level, and does not seem to set those automatically.
+        # Without this, this will complain about a null constraint violation.
+        time = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
 
+        %{
+          date: date,
+          user_id: current_user.id,
+          inserted_at: time,
+          updated_at: time
+        }
+      end)
+
+    # Creates the days, and slots in those days.
+    Butler.DaySchedules.create_days_with_slots(grouped_streaks, dates)
+
+    # Have to provide some visual feedback that the changes were saved.
     {:noreply, push_event(socket, "refresh_local_slots", params)}
   end
 

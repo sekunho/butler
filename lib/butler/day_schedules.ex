@@ -56,9 +56,47 @@ defmodule Butler.DaySchedules do
     |> Repo.insert(on_conflict: :nothing, returning: true)
   end
 
-  def create_available_slots(grouped_slots)
-    when is_map(grouped_slots) do
-    # Multi.insert_all()
+  def create_days_with_slots(grouped_slots, dates)
+    when is_map(grouped_slots) and is_list(dates) do
+    IO.puts "IN CDWS"
+    opts = [
+      on_conflict: [set: [updated_at: Timex.now()]],
+      returning: true,
+      conflict_target: [:user_id, :date]
+    ]
+
+    # TODO: Refactor. Gonna use the array type to keep track of selected indices.
+    Multi.new()
+    |> Multi.insert_all(:days, Day, dates, opts)
+    |> IO.inspect(label: "AFTER INSERT")
+    |> Multi.run(:streaks, fn _repo, %{days: {_len, days}} ->
+      Enum.reduce(days, Multi.new(), fn %{id: id, date: date}, multi ->
+        case Map.get(grouped_slots, date) do
+          nil -> []
+
+          streaks ->
+            # The reason the timestamps are manually specified is because Multi
+            # is pretty low-level, and does not seem to set those automatically.
+            # Without this, this will complain about a null constraint violation.
+            time = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+
+            Enum.reduce(streaks, multi, fn streak, multi ->
+              new_streak =
+                streak
+                |> Map.put(:inserted_at, time)
+                |> Map.put(:updated_at, time)
+                |> Map.put(:day_id, id)
+
+                Multi.insert(multi, Time.to_string(streak.from), new_streak)
+            end)
+        end
+      end)
+    end)
+    |> IO.inspect(label: "AFTER MERGE")
+    |> Repo.transaction()
+    |> IO.inspect(label: "After transaction")
+    # Upsert day (without the updating)
+    # Upsert time slot
   end
 
   @doc """

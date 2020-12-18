@@ -49,7 +49,7 @@ defmodule ButlerWeb.DayComponent do
   end
 
   defp offset_time(offset) do
-    Time.add(~T[00:00:00], trunc(offset * 3600), :seconds)
+    Time.add(~T[00:00:00], trunc(offset * 3600), :second)
   end
 
   defp get_time_offset(%DateTime{} = datetime) do

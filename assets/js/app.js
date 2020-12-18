@@ -78,6 +78,7 @@ liveSocket.connect()
 // >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket
 
+// Toggles a slot, and updates `selectedSlots` accordingly.
 function toggleSlot(slotEl, selectedSlots) {
     slotEl.classList.toggle("bg-green-200")
 
