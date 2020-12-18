@@ -53,11 +53,12 @@ defmodule Butler.DaySchedules do
   def create_day(attrs \\ %{}) do
     %Day{}
     |> Day.changeset(attrs)
-    |> Repo.insert(
-      on_conflict: [set: [updated_at: Timex.now]],
-      conflict_target: [:user_id, :date],
-      returning: true
-    )
+    |> Repo.insert(on_conflict: :nothing, returning: true)
+  end
+
+  def create_available_slots(grouped_slots)
+    when is_map(grouped_slots) do
+    # Multi.insert_all()
   end
 
   @doc """

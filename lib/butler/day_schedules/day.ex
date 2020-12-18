@@ -5,7 +5,7 @@ defmodule Butler.DaySchedules.Day do
   alias Butler.TimeStreaks.Streak
   alias Butler.Accounts.User
 
-  @primary_key {:id, :binary_id, autogenerate: true}
+  @primary_key {:id, :binary_id, read_after_writes: true}
   @foreign_key_type :binary_id
   schema "days" do
     field :date, :utc_datetime
