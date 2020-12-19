@@ -1,6 +1,7 @@
 defmodule ButlerWeb.TodoLive.Index do
   use ButlerWeb, :live_view
 
+  alias Butler.DaySchedules
   alias Butler.Schedules
   alias Butler.Schedules.Todo
   alias ButlerWeb.DayComponent
@@ -12,8 +13,10 @@ defmodule ButlerWeb.TodoLive.Index do
 
     if connected?(socket) do
       # Users can only be updated on changes of their own todos.
-      topic = IO.iodata_to_binary(["todos:", socket.assigns.current_user.id])
-      Schedules.subscribe(topic)
+      Enum.reduce(["todos:", "available_slots:"], [], fn topic_prefix, _ ->
+        topic = IO.iodata_to_binary([topic_prefix, socket.assigns.current_user.id])
+        Schedules.subscribe(topic)
+      end)
     end
 
     case socket.assigns.current_user do
@@ -24,7 +27,16 @@ defmodule ButlerWeb.TodoLive.Index do
           |> push_redirect(to: Routes.user_session_path(socket, :new))
         }
 
-      %User{id: user_id} -> {:ok, assign(socket, :todos, list_todos(user_id)), temporary_assigns: []}
+      %User{id: user_id} ->
+        avail_dates = list_available_dates(user_id)
+
+        socket =
+          socket
+          |> assign(:todos, list_todos(user_id))
+          |> assign(:dates, avail_dates)
+          |> assign(:mode, :visual)
+
+        {:ok, socket, temporary_assigns: [avail_dates: []]}
     end
   end
 
@@ -63,7 +75,14 @@ defmodule ButlerWeb.TodoLive.Index do
 
   @impl true
   def handle_event("new_todo", _params, socket) do
-    {:noreply, push_patch(socket, to: Routes.todo_index_path(socket, :new))}
+    case socket.assigns.mode do
+      :visual ->
+        {:noreply, push_patch(socket, to: Routes.todo_index_path(socket, :new))}
+
+      :select ->
+        msg = "You can't do this unless you exit visual mode."
+        {:noreply, put_flash(socket, :error, msg)}
+    end
   end
 
   @impl true
@@ -74,6 +93,71 @@ defmodule ButlerWeb.TodoLive.Index do
       socket
       |> assign(:todos, todos)
       |> put_flash(:info, "I've rescheduled your calendar! 🤵")}
+  end
+
+  @impl true
+  def handle_event("toggle_mode", _params, socket) do
+    {:noreply,
+      update(socket, :mode, fn mode ->
+        case mode do
+          :select -> :visual
+          :visual -> :select
+        end
+      end)}
+  end
+
+  @impl true
+  def handle_event("update_time_slots", %{"selected_slots" => slots} = params, socket) do
+    # TODO: Implement PubSub to update all instances of Butler for any changes.
+    current_user = socket.assigns.current_user
+
+    dates =
+      slots
+      |> Map.keys()
+      |> Enum.map(fn date ->
+        # The reason the timestamps are manually specified is because Multi
+        # is pretty low-level, and does not seem to set those automatically.
+        # Without this, this will complain about a null constraint violation.
+        time = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+        date_slots =
+          slots
+          |> Map.get(date, [])
+          |> Enum.reduce(MapSet.new(), fn slot, acc ->
+            index = String.to_integer(slot)
+
+            MapSet.put(acc, index)
+          end)
+          |> MapSet.to_list()
+          |> Enum.sort()
+
+        date =
+          IO.iodata_to_binary([date, "T00:00:00-00:00"])
+          |> Timex.parse!("{ISO:Extended}")
+
+        %{
+          date: date,
+          user_id: current_user.id,
+          inserted_at: time,
+          updated_at: time,
+          selected_slots: date_slots
+        }
+      end)
+
+    socket =
+      case Butler.DaySchedules.create_days_with_slots(dates) do
+        {:ok, _} ->
+          put_flash(socket, :info, "I've updated your available time slots. 🤵")
+
+        _ ->
+          put_flash(socket, :error, "An error happened while saving your changes.")
+      end
+
+    todos = run_scheduler(socket.assigns.current_user.id)
+    # Have to provide some visual feedback that the changes were saved.
+    {:noreply,
+      socket
+      |> assign(:todos, todos)
+      |> push_event("refresh_local_slots", params)}
   end
 
   @impl true
@@ -90,16 +174,81 @@ defmodule ButlerWeb.TodoLive.Index do
     {:noreply, assign(socket, :todos, todos)}
   end
 
-  defp run_scheduler(user_id) do
+  def run_scheduler(user_id) do
+    streaks =
+      user_id
+      |> list_available_dates()
+      |> Enum.reduce([], fn day, acc ->
+        streaks = get_streaks_from_slot_ids(day.date, day.selected_slots)
+        acc ++ streaks
+      end)
+
     user_id
     |> Schedules.list_todos()
-    |> Schedules.auto_assign()
+    |> Schedules.auto_assign(streaks)
+    |> case do
+      {:ok, results} ->
+        keys = Map.keys(results)
 
-    Schedules.list_todos(user_id)
+        Enum.reduce(keys, [], fn key, acc ->
+          [Map.fetch!(results, key) | acc]
+        end)
+    end
+  end
+
+  defp get_streaks_from_slot_ids(date, slot_ids) do
+    ndt = DateTime.to_naive(date)
+    midnight = Time.new!(0, 0, 0, 0)
+
+    # TODO: Refactor
+    Enum.reduce(slot_ids, {hd(slot_ids), []}, fn
+      id, {_prev_id, []} ->
+        offset = trunc((id * 0.5) * 1800)
+        from_ndt =
+          midnight
+          |> Time.add(offset, :second)
+          |> update_datetime_with_time(ndt)
+
+        to_ndt = NaiveDateTime.add(from_ndt, 1800, :second)
+        {id, [%{from: from_ndt, to: to_ndt}]}
+
+      id, {prev_id, streaks} ->
+        offset = trunc((id * 0.5) * 3600)
+        from_ndt =
+          midnight
+          |> Time.add(offset, :second)
+          |> update_datetime_with_time(ndt)
+
+        to_ndt = NaiveDateTime.add(from_ndt, 1800, :second)
+
+        streaks =
+          cond do
+            id - prev_id == 1 ->
+              prev_streak = hd(streaks)
+              remaining_streaks = tl(streaks)
+
+              [%{prev_streak | to: to_ndt} | remaining_streaks]
+
+            id - prev_id > 1 ->
+              [%{from: from_ndt, to: to_ndt} | streaks]
+          end
+
+        {id, streaks}
+    end)
+    |> fn {_, streaks} ->
+      Enum.map(streaks, fn %{from: from, to: to} ->
+        {from, to}
+      end)
+    end.()
   end
 
   defp list_todos(user_id) do
     Schedules.list_todos(user_id)
+  end
+
+  defp update_datetime_with_time(time, datetime) do
+    %{hour: hour, minute: minute} = time
+    %{datetime | hour: hour, minute: minute}
   end
 
   def list_week do
@@ -115,14 +264,11 @@ defmodule ButlerWeb.TodoLive.Index do
   end
 
   defp group_todos_by_day(todos) when is_list(todos) do
-    Enum.group_by(todos, fn todo ->
-      Timex.to_date(todo.start)
-    end)
-  end
-
-  defp group_available_by_day(avail_slots) when is_list(avail_slots) do
-    Enum.group_by(avail_slots, fn {start, _} ->
-      Timex.to_date(start)
+    Enum.group_by(todos, fn
+      %{start: nil} ->
+        nil
+      %{start: start} ->
+        DateTime.to_date(start)
     end)
   end
 
@@ -132,17 +278,22 @@ defmodule ButlerWeb.TodoLive.Index do
     |> String.capitalize()
   end
 
-  # TODO: Remove when user-defined available slots are implemented.
-  defp sample_streaks do
-    [{~N[2020-12-15 09:00:00.00], ~N[2020-12-15 12:00:00.00]},
-      {~N[2020-12-15 13:00:00.00], ~N[2020-12-15 20:00:00.00]},
-      {~N[2020-12-16 09:00:00.00], ~N[2020-12-16 12:00:00.00]},
-      {~N[2020-12-16 13:00:00.00], ~N[2020-12-16 20:00:00.00]},
-      {~N[2020-12-17 09:00:00.00], ~N[2020-12-17 12:00:00.00]},
-      {~N[2020-12-17 13:00:00.00], ~N[2020-12-17 15:00:00.00]},
-      {~N[2020-12-18 09:00:00.00], ~N[2020-12-18 12:00:00.00]},
-      {~N[2020-12-18 13:00:00.00], ~N[2020-12-18 20:00:00.00]},
-      {~N[2020-12-19 09:00:00.00], ~N[2020-12-19 12:00:00.00]},
-      {~N[2020-12-19 13:00:00.00], ~N[2020-12-19 20:00:00.00]}]
+  defp list_available_dates(user_id) do
+    from = Timex.beginning_of_week(DateTime.utc_now(), :sun)
+    to = Timex.shift(from, days: 6)
+
+    DaySchedules.list_days(user_id, from, to)
+  end
+
+  defp get_slots_from_date(dates, date) when is_list(dates) do
+    dates
+    |> Enum.find(fn d ->
+      d_date = DateTime.to_date(d.date)
+      Date.compare(d_date, date) == :eq
+    end)
+    |> case do
+      nil -> []
+      date -> Map.get(date, :selected_slots, [])
+    end
   end
 end

@@ -17,3 +17,14 @@
     }
   }
 }
+
+.events {
+  &__time-slot {
+    @apply absolute w-full border-b;
+  
+    
+    &--active {
+      @apply bg-green-400;
+    }
+  }
+}

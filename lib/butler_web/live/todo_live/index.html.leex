@@ -12,12 +12,18 @@
     <div class="sample-nav bg-red-500">
         <%= render ButlerWeb.SharedView, "navbar.html", current_user: @current_user, socket: @socket %>
     </div>
-    <div phx-window-keydown="new_todo" phx-key="n" class="overflow-y-auto grid grid-cols-four-one sample bg-blue-500">
+    <%= if @mode == :visual do %>
+    <div phx-window-keydown="new_todo"
+        phx-key="n"
+        class="overflow-y-auto grid grid-cols-four-one sample bg-blue-500">
+    <% else %>
+    <div class="overflow-y-auto grid grid-cols-four-one sample bg-blue-500">
+    <% end %>
         <!-- CALENDAR -->
         <div class="bg-white relative overflow-y-auto">
             <div class="bg-white w-full flex space-x-4 items-end sticky top-0 z-20 py-6 pl-6 shadow-sm">
                 <div class="flex space-x-2 items-center">
-                    <span class="relative z-0 inline-flex shadow-sm rounded-md">
+                    <!-- <span class="relative z-0 inline-flex shadow-sm rounded-md">
                         <button type="button"
                             class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
                             <span class="sr-only">Previous</span>
@@ -38,15 +44,30 @@
                                     clip-rule="evenodd" />
                             </svg>
                         </button>
-                    </span>
+                    </span> -->
 
                     <h3 class="text-3xl text-gray-800">
-                        <span class="font-bold font-display ml-2">
+                        <span class="font-bold font-display">
                             <%= Timex.month_name(Timex.today() |> Map.get(:month)) %>
                         </span>
                         <%= Timex.today() |> Map.get(:year) %>
                     </h3>
                 </div>
+
+                <button type="button"
+                    phx-click="toggle_mode"
+                    class="inline-flex items-center p-3 border border-indigo-500 shadow-sm text-sm leading-4 font-medium rounded-full text-indigo-600 bg-white hover:bg-indigo-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <%= if @mode == :visual do %>
+                        <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                        </svg>
+                    <% else %>
+                        <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                    <% end %>
+                </button>
 
                 <button type="button"
                     phx-click="run_scheduler"
@@ -61,27 +82,43 @@
 
             <div class="flex pt-6 pl-4">
                 <div class="pt-12">
-                    <ul class="timeline text-sm text-gray-500 mr-4">
-                        <%= for hour <- 0..23 do %>
+                    <ul draggable="false" class="timeline text-sm text-gray-500 mr-4 mt-4">
+                        <%= for hour <- 0..24 do %>
                             <li>
-                                <span>
-                                    <%= IO.iodata_to_binary([Integer.to_string(hour), ":00"]) %>
-                                </span>
+                                <%= if hour != 24 do %>
+                                    <%= "#{hour}:00" %>
+                                <% end %>
                             </li>
                         <% end %>
                     </ul>
                 </div>
-                <div class="grid grid-cols-7 text-gray-500 divide-x w-full z-10">
-                    <% grouped_todos = group_todos_by_day(@todos) %>
-                    <% grouped_avail_slots = group_available_by_day(sample_streaks()) %>
+                <%= case @mode do %>
+                    <% :visual -> %>
+                        <div id="visual-calendar" class="grid grid-cols-7 text-gray-500 divide-x w-full z-10">
+                            <% grouped_todos = group_todos_by_day(@todos) %>
 
-                    <%= for day <- list_week() do %>
-                        <%= live_component @socket, DayComponent,
-                            day: day,
-                            slots: Map.get(grouped_avail_slots, day, []),
-                            todos: Map.get(grouped_todos, day, []) %>
-                    <% end %>
-                </div>
+                            <%= for date <- list_week() do %>
+                                <%= live_component @socket, DayComponent,
+                                    date: date,
+                                    id: date.day,
+                                    mode: @mode,
+                                    slots: [],
+                                    todos: Map.get(grouped_todos, date, []) %>
+                            <% end %>
+                        </div>
+
+                    <% :select -> %>
+                        <div id="select-calendar" class="grid grid-cols-7 text-gray-500 divide-x w-full z-10" phx-hook="TimeSlots">
+                            <%= for date <- list_week() do %>
+                                <%= live_component @socket, DayComponent,
+                                    date: date,
+                                    id: date.day,
+                                    mode: @mode,
+                                    slots: get_slots_from_date(@dates, date),
+                                    todos: [] %>
+                            <% end %>
+                        </div>
+                <% end %>
             </div>
         </div>
 
@@ -142,6 +179,37 @@
                                     <% end %>
                             <% end %>
                         </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="inset-x-0 bottom-0">
+        <div class="banner--<%= @mode |> Atom.to_string() %>">
+            <div class="max-w-7xl mx-auto py-1.5 px-3 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between flex-wrap">
+                    <div class="w-0 flex-1 flex justify-center items-center">
+                        <span class="flex p-2 rounded-lg banner__icon-bg--<%= @mode |> Atom.to_string() %>">
+                            <%= if @mode == :visual do %>
+                                <svg class="h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                            <% else %>
+                                <svg class="h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                </svg>
+                            <% end %>
+                        </span>
+                        <p class="text-sm ml-3 font-medium text-white truncate">
+                            <% mode_str = Atom.to_string(@mode) |> String.capitalize() %>
+                            <span class="md:hidden">
+                                <%= mode_str %> Mode
+                            </span>
+                            <span class="hidden md:inline">
+                                You are in <%= mode_str %> Mode
+                            </span>
+                        </p>
                     </div>
                 </div>
             </div>

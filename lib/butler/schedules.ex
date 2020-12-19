@@ -136,22 +136,9 @@ defmodule Butler.Schedules do
   # Auto-scheduler behavior
   alias Ecto.Multi
 
-  def auto_assign(todos) do
+  def auto_assign(todos, time_streaks) do
     # TODO: Remove when selecting available slots is implemented.
     # TODO: Find a better way than this. It's really messy. :(
-    # TODO: Make time_streaks user-defined.
-    time_streaks = [
-      {~N[2020-12-15 09:00:00.00], ~N[2020-12-15 12:00:00.00]},
-      {~N[2020-12-15 13:00:00.00], ~N[2020-12-15 20:00:00.00]},
-      {~N[2020-12-16 09:00:00.00], ~N[2020-12-16 12:00:00.00]},
-      {~N[2020-12-16 13:00:00.00], ~N[2020-12-16 20:00:00.00]},
-      {~N[2020-12-17 09:00:00.00], ~N[2020-12-17 12:00:00.00]},
-      {~N[2020-12-17 13:00:00.00], ~N[2020-12-17 15:00:00.00]},
-      {~N[2020-12-18 09:00:00.00], ~N[2020-12-18 12:00:00.00]},
-      {~N[2020-12-18 13:00:00.00], ~N[2020-12-18 20:00:00.00]},
-      {~N[2020-12-19 09:00:00.00], ~N[2020-12-19 12:00:00.00]},
-      {~N[2020-12-19 13:00:00.00], ~N[2020-12-19 20:00:00.00]}
-    ]
     time_streak_durations = Core.TimeStreak.get_durations(time_streaks, :matrix)
     todo_durations = Core.Todo.to_duration_matrix(todos)
     todo_priorities = Core.Todo.to_priority_matrix(todos)

@@ -63,7 +63,7 @@ defmodule ButlerWeb.TodoLive.FormComponent do
   def save_todo(socket, :edit, todo_params) do
     case Schedules.update_todo(socket.assigns.todo, todo_params) do
       {:ok, _todo} ->
-        todos = run_scheduler(socket.assigns.current_user.id)
+        todos = ButlerWeb.TodoLive.Index.run_scheduler(socket.assigns.current_user.id)
 
         {:noreply,
           socket
@@ -76,12 +76,11 @@ defmodule ButlerWeb.TodoLive.FormComponent do
     end
   end
 
-  defp run_scheduler(user_id) do
-    user_id
-    |> Schedules.list_todos()
-    |> Schedules.auto_assign()
+  defp list_available_dates(user_id) do
+    from = Timex.beginning_of_week(DateTime.utc_now(), :sun)
+    to = Timex.shift(from, days: 6)
 
-    Schedules.list_todos(user_id)
+    DaySchedules.list_days(user_id, from, to)
   end
 
   defp list_priorities do
