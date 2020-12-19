@@ -23,7 +23,7 @@
         <div class="bg-white relative overflow-y-auto">
             <div class="bg-white w-full flex space-x-4 items-end sticky top-0 z-20 py-6 pl-6 shadow-sm">
                 <div class="flex space-x-2 items-center">
-                    <span class="relative z-0 inline-flex shadow-sm rounded-md">
+                    <!-- <span class="relative z-0 inline-flex shadow-sm rounded-md">
                         <button type="button"
                             class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
                             <span class="sr-only">Previous</span>
@@ -44,10 +44,10 @@
                                     clip-rule="evenodd" />
                             </svg>
                         </button>
-                    </span>
+                    </span> -->
 
                     <h3 class="text-3xl text-gray-800">
-                        <span class="font-bold font-display ml-2">
+                        <span class="font-bold font-display">
                             <%= Timex.month_name(Timex.today() |> Map.get(:month)) %>
                         </span>
                         <%= Timex.today() |> Map.get(:year) %>
