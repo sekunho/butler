@@ -89,25 +89,23 @@ window.liveSocket = liveSocket
 
 // Toggles a slot, and updates `selectedSlots` accordingly.
 function toggleSlot(slotEl) {
-    slotEl.classList.toggle("bg-green-200")
+    const activeClass = "events__time-slot--active"
+    slotEl.classList.toggle(activeClass)
 
-    const isSelected = slotEl.classList.contains("bg-green-200")
+    const isSelected = slotEl.classList.contains(activeClass)
     const index = slotEl.getAttribute("phx-value-id")
     const day = slotEl.getAttribute("phx-value-day")
-    const slot = slotEl.getAttribute("phx-value-slot")
-    const slotVal = { "day": day, "slot": slot, "index": index }
 
     // Check if the new toggled state is selected.
     if (isSelected) {
         updateDaySlots(day, index)
-
     } else {
-        const ndx = selectedSlots[day].findIndex((el, index) => {
-            el == index
+        const ndx = selectedSlots[day].findIndex((el) => {
+            return el == index
         })
 
         if (ndx > -1) {
-            selectedSlots[day][ndx].splice(ndx, 1)
+            selectedSlots[day].splice(ndx, 1)
         }
     }
 }

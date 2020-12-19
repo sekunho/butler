@@ -10,3 +10,23 @@
   content: '';
   height: 1px;
 }
+
+.banner {
+  &--visual {
+    @apply bg-indigo-600;
+  }
+
+  &--select {
+    @apply bg-green-600;
+  }
+
+  &__icon-bg {
+    &--visual {
+      @apply bg-indigo-800;
+    }
+
+    &--select {
+      @apply bg-green-800;
+    }
+  }
+}

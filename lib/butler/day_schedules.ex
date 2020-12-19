@@ -93,6 +93,7 @@ defmodule Butler.DaySchedules do
         Multi.insert(multi, index, date_cs, date_opts)
     end)
     |> Repo.transaction()
+    |> IO.inspect()
   end
 
   @doc """

@@ -37,7 +37,6 @@ defmodule ButlerWeb.DayComponent do
                       draggable="false"
                       phx-value-id="<%= offset %>"
                       phx-value-day="<%= @date %>"
-                      phx-value-slot="<%= offset_time(offset * 0.5) %>"
                         style="margin-top: calc(3.25rem * <%= 0.5 * offset %>); height: calc(3.25rem * 0.5);">
                     </li>
                 <% end %>
@@ -45,10 +44,6 @@ defmodule ButlerWeb.DayComponent do
         </ul>
     </div>
     """
-  end
-
-  defp offset_time(offset) do
-    Time.add(~T[00:00:00], trunc(offset * 3600), :second)
   end
 
   defp get_time_offset(%DateTime{} = datetime) do

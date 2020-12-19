@@ -13,8 +13,10 @@ defmodule ButlerWeb.TodoLive.Index do
 
     if connected?(socket) do
       # Users can only be updated on changes of their own todos.
-      topic = IO.iodata_to_binary(["todos:", socket.assigns.current_user.id])
-      Schedules.subscribe(topic)
+      Enum.reduce(["todos:", "available_slots:"], [], fn topic_prefix, _ ->
+        topic = IO.iodata_to_binary([topic_prefix, socket.assigns.current_user.id])
+        Schedules.subscribe(topic)
+      end)
     end
 
     case socket.assigns.current_user do
@@ -32,7 +34,7 @@ defmodule ButlerWeb.TodoLive.Index do
           socket
           |> assign(:todos, list_todos(user_id))
           |> assign(:dates, avail_dates)
-          |> assign(:mode, :select)
+          |> assign(:mode, :visual)
 
         {:ok, socket, temporary_assigns: []}
     end
@@ -73,7 +75,14 @@ defmodule ButlerWeb.TodoLive.Index do
 
   @impl true
   def handle_event("new_todo", _params, socket) do
-    {:noreply, push_patch(socket, to: Routes.todo_index_path(socket, :new))}
+    case socket.assigns.mode do
+      :visual ->
+        {:noreply, push_patch(socket, to: Routes.todo_index_path(socket, :new))}
+
+      :select ->
+        msg = "You can't do this unless you exit visual mode."
+        {:noreply, put_flash(socket, :error, msg)}
+    end
   end
 
   @impl true
@@ -87,12 +96,19 @@ defmodule ButlerWeb.TodoLive.Index do
   end
 
   @impl true
-  def handle_event("to_select_mode", _params, socket) do
-    {:noreply, socket}
+  def handle_event("toggle_mode", _params, socket) do
+    {:noreply,
+      update(socket, :mode, fn mode ->
+        case mode do
+          :select -> :visual
+          :visual -> :select
+        end
+      end)}
   end
 
   @impl true
   def handle_event("update_time_slots", %{"selected_slots" => slots} = params, socket) do
+    # TODO: Implement PubSub to update all instances of Butler for any changes.
     current_user = socket.assigns.current_user
 
     dates =
@@ -106,11 +122,12 @@ defmodule ButlerWeb.TodoLive.Index do
         date_slots =
           slots
           |> Map.get(date, [])
-          |> Enum.reduce([], fn slot, acc ->
+          |> Enum.reduce(MapSet.new(), fn slot, acc ->
             index = String.to_integer(slot)
 
-            [index | acc]
+            MapSet.put(acc, index)
           end)
+          |> MapSet.to_list()
           |> Enum.sort()
 
         %{
@@ -122,8 +139,14 @@ defmodule ButlerWeb.TodoLive.Index do
         }
       end)
 
-    # Creates the days, and slots in those days.
-    Butler.DaySchedules.create_days_with_slots(dates)
+    socket =
+      case Butler.DaySchedules.create_days_with_slots(dates) do
+        {:ok, _} ->
+          put_flash(socket, :info, "I've updated your available time slots. 🤵")
+
+        {:error, _} ->
+          put_flash(socket, :error, "An error happened while saving your changes.")
+      end
 
     # Have to provide some visual feedback that the changes were saved.
     {:noreply, push_event(socket, "refresh_local_slots", params)}
@@ -170,12 +193,6 @@ defmodule ButlerWeb.TodoLive.Index do
   defp group_todos_by_day(todos) when is_list(todos) do
     Enum.group_by(todos, fn todo ->
       Timex.to_date(todo.start)
-    end)
-  end
-
-  defp group_slots_by_day(dates) do
-    Enum.reduce(dates, [], fn day, acc ->
-      [%{date: day.date, slots: day.selected_slots} | acc]
     end)
   end
 
