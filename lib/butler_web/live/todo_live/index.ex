@@ -26,10 +26,12 @@ defmodule ButlerWeb.TodoLive.Index do
         }
 
       %User{id: user_id} ->
+        avail_dates = list_available_dates(user_id)
+
         socket =
           socket
           |> assign(:todos, list_todos(user_id))
-          |> assign(:dates, list_available_dates(user_id))
+          |> assign(:dates, avail_dates)
           |> assign(:mode, :select)
 
         {:ok, socket, temporary_assigns: []}
@@ -92,18 +94,24 @@ defmodule ButlerWeb.TodoLive.Index do
   @impl true
   def handle_event("update_time_slots", %{"selected_slots" => slots} = params, socket) do
     current_user = socket.assigns.current_user
-    grouped_slots = DaySchedules.from_unparse_days(slots)
 
-    # TODO: Sort slot indices
     dates =
-      grouped_slots
+      slots
       |> Map.keys()
       |> Enum.map(fn date ->
         # The reason the timestamps are manually specified is because Multi
         # is pretty low-level, and does not seem to set those automatically.
         # Without this, this will complain about a null constraint violation.
         time = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
-        date_slots = Map.get(grouped_slots, date, [])
+        date_slots =
+          slots
+          |> Map.get(date, [])
+          |> Enum.reduce([], fn slot, acc ->
+            index = String.to_integer(slot)
+
+            [index | acc]
+          end)
+          |> Enum.sort()
 
         %{
           date: date,
@@ -114,7 +122,7 @@ defmodule ButlerWeb.TodoLive.Index do
         }
       end)
 
-    # # Creates the days, and slots in those days.
+    # Creates the days, and slots in those days.
     Butler.DaySchedules.create_days_with_slots(dates)
 
     # Have to provide some visual feedback that the changes were saved.
@@ -162,6 +170,12 @@ defmodule ButlerWeb.TodoLive.Index do
   defp group_todos_by_day(todos) when is_list(todos) do
     Enum.group_by(todos, fn todo ->
       Timex.to_date(todo.start)
+    end)
+  end
+
+  defp group_slots_by_day(dates) do
+    Enum.reduce(dates, [], fn day, acc ->
+      [%{date: day.date, slots: day.selected_slots} | acc]
     end)
   end
 

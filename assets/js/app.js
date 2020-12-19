@@ -17,7 +17,7 @@ import { Socket } from "phoenix"
 import NProgress from "nprogress"
 import { LiveSocket } from "phoenix_live_view"
 
-let selectedSlots = []
+let selectedSlots = {}
 
 let Hooks = {}
 Hooks.TimeSlots = {
@@ -27,8 +27,16 @@ Hooks.TimeSlots = {
         let isDown = false
 
         for (let x = 0; x < slots.length; x++) {
+            const slotDate = slots[x].getAttribute("phx-value-day")
+            const slotId = slots[x].getAttribute("phx-value-id")
+            const isSelectedSlot = slots[x].classList.contains("events__time-slot--active")
+
+            if (isSelectedSlot) {
+                updateDaySlots(slotDate, slotId)
+            }
+
             slots[x].addEventListener("mousedown", (e) => {
-                toggleSlot(e.target, selectedSlots)
+                toggleSlot(e.target)
 
                 isDown = true
             })
@@ -38,7 +46,7 @@ Hooks.TimeSlots = {
                     const elem = e.target.closest(`.${className}`);
 
                     if (elem) {
-                        toggleSlot(elem, selectedSlots)
+                        toggleSlot(elem)
                     }
                 }
             }, false)
@@ -80,7 +88,7 @@ liveSocket.connect()
 window.liveSocket = liveSocket
 
 // Toggles a slot, and updates `selectedSlots` accordingly.
-function toggleSlot(slotEl, selectedSlots) {
+function toggleSlot(slotEl) {
     slotEl.classList.toggle("bg-green-200")
 
     const isSelected = slotEl.classList.contains("bg-green-200")
@@ -89,15 +97,26 @@ function toggleSlot(slotEl, selectedSlots) {
     const slot = slotEl.getAttribute("phx-value-slot")
     const slotVal = { "day": day, "slot": slot, "index": index }
 
+    // Check if the new toggled state is selected.
     if (isSelected) {
-        selectedSlots.push(slotVal)
+        updateDaySlots(day, index)
+
     } else {
-        const ndx = selectedSlots.findIndex((el, index) => {
-            return JSON.stringify(el) == JSON.stringify(slotVal)
+        const ndx = selectedSlots[day].findIndex((el, index) => {
+            el == index
         })
 
         if (ndx > -1) {
-            selectedSlots.splice(ndx, 1)
+            selectedSlots[day][ndx].splice(ndx, 1)
         }
+    }
+}
+
+// Update local copy of selected slots.
+function updateDaySlots(date, slotId) {
+    if (date in selectedSlots) {
+        selectedSlots[date].push(slotId)
+    } else {
+        selectedSlots[date] = [slotId]
     }
 }
