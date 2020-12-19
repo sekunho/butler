@@ -64,7 +64,7 @@ defmodule ButlerWeb.DayComponent do
 
   defp get_day_num(%{day: day}), do: day
 
-  defp is_today?(date), do: date == DateTime.utc_now()
+  defp is_today?(date), do: date == DateTime.to_date(DateTime.utc_now())
 
   defp is_disabled?(date), do: Timex.before?(date, DateTime.utc_now())
 

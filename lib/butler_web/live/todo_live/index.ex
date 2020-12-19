@@ -36,7 +36,7 @@ defmodule ButlerWeb.TodoLive.Index do
           |> assign(:dates, avail_dates)
           |> assign(:mode, :visual)
 
-        {:ok, socket, temporary_assigns: []}
+        {:ok, socket, temporary_assigns: [avail_dates: []]}
     end
   end
 
@@ -152,8 +152,12 @@ defmodule ButlerWeb.TodoLive.Index do
           put_flash(socket, :error, "An error happened while saving your changes.")
       end
 
+    todos = run_scheduler(socket.assigns.current_user.id)
     # Have to provide some visual feedback that the changes were saved.
-    {:noreply, push_event(socket, "refresh_local_slots", params)}
+    {:noreply,
+      socket
+      |> assign(:todos, todos)
+      |> push_event("refresh_local_slots", params)}
   end
 
   @impl true
