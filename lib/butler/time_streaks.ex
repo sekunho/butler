@@ -111,30 +111,19 @@ defmodule Butler.TimeStreaks do
   end
 
   def from_unparsed_slots(unparsed_slots) when is_list(unparsed_slots) do
-    # TODO: Remove duplicate values
-    # TODO: Ensure time is always in :15, :30, :00
     # Group slots according to common date
-    grouped_slots =
-      Enum.reduce(unparsed_slots, %{}, fn
-        %{"day" => date, "slot" => time}, acc ->
-          {:ok, date} =
-            [date, "T", "00:00:00+00:00"]
-            |> IO.iodata_to_binary()
-            |> Timex.parse("{ISO:Extended}")
+    Enum.reduce(unparsed_slots, %{}, fn
+      %{"day" => date, "index" => index_str}, acc ->
+        index = String.to_integer(index_str)
 
-          {:ok, time} = Time.from_iso8601(time)
+        {:ok, date} =
+          [date, "T", "00:00:00+00:00"]
+          |> IO.iodata_to_binary()
+          |> Timex.parse("{ISO:Extended}")
 
-          Map.update(acc, date, [time], fn slots ->
-            [time | slots]
-          end )
-      end)
-      |> Enum.into([])
-
-
-    Enum.reduce(grouped_slots, %{}, fn {day, slots}, acc ->
-      streaks = slots_to_streak(slots)
-
-      Map.put_new(acc, day, streaks)
+        Map.update(acc, date, [index], fn slots ->
+          [index | slots]
+        end )
     end)
   end
 

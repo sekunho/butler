@@ -83,9 +83,10 @@ function toggleSlot(slotEl, selectedSlots) {
     slotEl.classList.toggle("bg-green-200")
 
     const isSelected = slotEl.classList.contains("bg-green-200")
+    const index = slotEl.getAttribute("phx-value-id")
     const day = slotEl.getAttribute("phx-value-day")
     const slot = slotEl.getAttribute("phx-value-slot")
-    const slotVal = { "day": day, "slot": slot }
+    const slotVal = { "day": day, "slot": slot, "index": index }
 
     if (isSelected) {
         selectedSlots.push(slotVal)

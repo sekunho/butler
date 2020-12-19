@@ -94,11 +94,15 @@ defmodule ButlerWeb.TodoLive.Index do
   def handle_event("update_time_slots", %{"selected_slots" => slots} = params, socket) do
     current_user = socket.assigns.current_user
 
+    IO.inspect(slots, label: "selected slots")
+
     # TODO: Store time slots as streaks of time in database.
     ## Consider the cases, shrinking both ends, and breaking a time slot
     grouped_streaks = TimeStreaks.from_unparsed_slots(slots)
 
-    # TODO: Complete insert for days and time streaks
+    IO.inspect(grouped_streaks)
+
+    # TODO: Sort slot indices
     dates =
       grouped_streaks
       |> Map.keys()
@@ -107,17 +111,22 @@ defmodule ButlerWeb.TodoLive.Index do
         # is pretty low-level, and does not seem to set those automatically.
         # Without this, this will complain about a null constraint violation.
         time = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+        date_slots = Map.get(grouped_streaks, date, [])
+        date_attrs =
+          %{
+            date: date,
+            user_id: current_user.id,
+            inserted_at: time,
+            updated_at: time,
+            selected_slots: date_slots
+          }
 
-        %{
-          date: date,
-          user_id: current_user.id,
-          inserted_at: time,
-          updated_at: time
-        }
+        DaySchedules.change_day(%Day{}, date_attrs)
       end)
+      |> IO.inspect()
 
-    # Creates the days, and slots in those days.
-    Butler.DaySchedules.create_days_with_slots(grouped_streaks, dates)
+    # # Creates the days, and slots in those days.
+    Butler.DaySchedules.create_days_with_slots(dates)
 
     # Have to provide some visual feedback that the changes were saved.
     {:noreply, push_event(socket, "refresh_local_slots", params)}

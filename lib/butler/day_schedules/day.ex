@@ -9,6 +9,7 @@ defmodule Butler.DaySchedules.Day do
   @foreign_key_type :binary_id
   schema "days" do
     field :date, :utc_datetime
+    field :selected_slots, {:array, :integer}, default: []
 
     belongs_to :user, User, foreign_key: :user_id, type: :binary_id
     has_many :streaks, Streak
