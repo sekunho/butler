@@ -110,7 +110,6 @@
                     <% :select -> %>
                         <div id="select-calendar" class="grid grid-cols-7 text-gray-500 divide-x w-full z-10" phx-hook="TimeSlots">
                             <%= for date <- list_week() do %>
-                                <% IO.inspect(get_slots_from_date(@dates, date)) %>
                                 <%= live_component @socket, DayComponent,
                                     date: date,
                                     id: date.day,

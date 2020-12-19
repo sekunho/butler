@@ -76,13 +76,6 @@ defmodule ButlerWeb.TodoLive.FormComponent do
     end
   end
 
-  defp list_available_dates(user_id) do
-    from = Timex.beginning_of_week(DateTime.utc_now(), :sun)
-    to = Timex.shift(from, days: 6)
-
-    DaySchedules.list_days(user_id, from, to)
-  end
-
   defp list_priorities do
     ["None": :none, "Low": :low, "Medium": :medium, "High": :high]
   end

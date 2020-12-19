@@ -75,11 +75,4 @@ defmodule ButlerWeb.DayComponent do
       false -> ""
     end
   end
-
-  defp get_slot_length(from, to) do
-    from_t = NaiveDateTime.to_time(from)
-    to_t = NaiveDateTime.to_time(to)
-
-    Timex.diff(to_t, from_t, :seconds)/ 3600
-  end
 end

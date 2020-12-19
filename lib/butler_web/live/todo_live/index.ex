@@ -59,7 +59,7 @@ defmodule ButlerWeb.TodoLive.Index do
 
   defp apply_action(socket, :index, _params) do
     socket
-    |> assign(:page_title, "Listing Todos")
+  |> assign(:page_title, "Calendar")
     |> assign(:todo, nil)
   end
 
@@ -155,7 +155,6 @@ defmodule ButlerWeb.TodoLive.Index do
     todos = run_scheduler(socket.assigns.current_user.id)
 
     # Have to provide some visual feedback that the changes were saved.
-    IO.inspect(params, label: "NEW SLOTS")
     {:noreply,
       socket
       |> assign(:todos, todos)
@@ -215,7 +214,6 @@ defmodule ButlerWeb.TodoLive.Index do
 
       true -> todos
     end
-    |> IO.inspect(label: "POST-SCHEDULER")
 
     Schedules.list_todos(user_id)
   end
@@ -315,13 +313,11 @@ defmodule ButlerWeb.TodoLive.Index do
   end
 
   defp get_slots_from_date(dates, date) when is_list(dates) do
-    IO.inspect(date, label: "date")
     dates
     |> Enum.find(fn d ->
       d_date = DateTime.to_date(d.date)
       Date.compare(d_date, date) == :eq
     end)
-    |> IO.inspect(label: "BETWN")
     |> case do
       nil ->
         []
