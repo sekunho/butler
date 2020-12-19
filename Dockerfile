@@ -9,6 +9,7 @@ RUN \
     erlang-dev \
     build-base \
     gcc \
+    git \
     lapack \
     lapack-dev \
     musl \
@@ -42,23 +43,6 @@ RUN cd assets/ && \
 
 FROM elixir:1.11.2-alpine
 
-# RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/testing/" >> /etc/apk/repositories
-# # Install `matrex` dependencies.
-# RUN \
-#     apk --no-cache --update add \
-#     erlang-dev \
-#     build-base \
-#     gcc \
-#     lapack \
-#     lapack-dev \
-#     musl \
-#     libgfortran \
-#     openblas-dev \
-#     openblas && \
-#     rm -rf /var/cache/apk/*
-
-# RUN ln -s /usr/include/locale.h /usr/include/xlocale.h
-
 EXPOSE 4000
 ENV PORT=4000 MIX_ENV=prod
 
@@ -83,9 +67,5 @@ COPY --from=phx-builder /opt/app/config /opt/app/config
 COPY --from=phx-builder /opt/app/lib /opt/app/lib
 COPY --from=phx-builder /opt/app/deps /opt/app/deps
 COPY --from=phx-builder /opt/app/mix.* /opt/app/
-
-# alternatively you can just copy the whole dir over with:
-# COPY --from=phx-builder /opt/app /opt/app
-# be warned, this will however copy over non-build files
 
 CMD ["_build/prod/rel/butler/bin/butler", "start"]
