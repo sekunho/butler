@@ -59,7 +59,7 @@ defmodule ButlerWeb.TodoLive.Index do
 
   defp apply_action(socket, :index, _params) do
     socket
-  |> assign(:page_title, "Calendar")
+    |> assign(:page_title, "Calendar")
     |> assign(:todo, nil)
   end
 

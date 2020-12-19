@@ -22,6 +22,17 @@ let isDown = false
 const className = "events__time-slot"
 
 let Hooks = {}
+Hooks.MobileMenu = {
+    mounted() {
+        let menuBtn = document.getElementById("mobile-menu")
+        let menuExitBtn = document.getElementById("mobile-menu-exit")
+        let drawer = document.getElementById("mobile-menu-drawer")
+
+        menuBtn.addEventListener("click", () => drawer.classList.remove("hidden"))
+        menuExitBtn.addEventListener("click", () => drawer.classList.add("hidden"))
+    }
+}
+
 Hooks.TimeSlots = {
     mounted() {
         let slots = document.getElementsByClassName(className)
