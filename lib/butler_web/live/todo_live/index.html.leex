@@ -12,7 +12,13 @@
     <div class="sample-nav bg-red-500">
         <%= render ButlerWeb.SharedView, "navbar.html", current_user: @current_user, socket: @socket %>
     </div>
-    <div phx-window-keydown="new_todo" phx-key="n" class="overflow-y-auto grid grid-cols-four-one sample bg-blue-500">
+    <%= if @mode == :visual do %>
+    <div phx-window-keydown="new_todo"
+        phx-key="n"
+        class="overflow-y-auto grid grid-cols-four-one sample bg-blue-500">
+    <% else %>
+    <div class="overflow-y-auto grid grid-cols-four-one sample bg-blue-500">
+    <% end %>
         <!-- CALENDAR -->
         <div class="bg-white relative overflow-y-auto">
             <div class="bg-white w-full flex space-x-4 items-end sticky top-0 z-20 py-6 pl-6 shadow-sm">
@@ -86,18 +92,33 @@
                         <% end %>
                     </ul>
                 </div>
-                <div id="calendar" class="grid grid-cols-7 text-gray-500 divide-x w-full z-10" phx-hook="TimeSlots">
-                    <% grouped_todos = group_todos_by_day(@todos) %>
+                <%= case @mode do %>
+                    <% :visual -> %>
+                        <div id="visual-calendar" class="grid grid-cols-7 text-gray-500 divide-x w-full z-10">
+                            <% grouped_todos = group_todos_by_day(@todos) %>
 
-                    <%= for date <- list_week() do %>
-                        <%= live_component @socket, DayComponent,
-                            date: date,
-                            id: date.day,
-                            mode: @mode,
-                            slots: get_slots_from_date(@dates, date),
-                            todos: Map.get(grouped_todos, date, []) %>
-                    <% end %>
-                </div>
+                            <%= for date <- list_week() do %>
+                                <%= live_component @socket, DayComponent,
+                                    date: date,
+                                    id: date.day,
+                                    mode: @mode,
+                                    slots: [],
+                                    todos: Map.get(grouped_todos, date, []) %>
+                            <% end %>
+                        </div>
+
+                    <% :select -> %>
+                        <div id="select-calendar" class="grid grid-cols-7 text-gray-500 divide-x w-full z-10" phx-hook="TimeSlots">
+                            <%= for date <- list_week() do %>
+                                <%= live_component @socket, DayComponent,
+                                    date: date,
+                                    id: date.day,
+                                    mode: @mode,
+                                    slots: get_slots_from_date(@dates, date),
+                                    todos: [] %>
+                            <% end %>
+                        </div>
+                <% end %>
             </div>
         </div>
 

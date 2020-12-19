@@ -130,6 +130,10 @@ defmodule ButlerWeb.TodoLive.Index do
           |> MapSet.to_list()
           |> Enum.sort()
 
+        date =
+          IO.iodata_to_binary([date, "T00:00:00-00:00"])
+          |> Timex.parse!("{ISO:Extended}")
+
         %{
           date: date,
           user_id: current_user.id,
@@ -144,7 +148,7 @@ defmodule ButlerWeb.TodoLive.Index do
         {:ok, _} ->
           put_flash(socket, :info, "I've updated your available time slots. 🤵")
 
-        {:error, _} ->
+        _ ->
           put_flash(socket, :error, "An error happened while saving your changes.")
       end
 
@@ -166,22 +170,87 @@ defmodule ButlerWeb.TodoLive.Index do
     {:noreply, assign(socket, :todos, todos)}
   end
 
-  defp run_scheduler(user_id) do
+  def run_scheduler(user_id) do
+    streaks =
+      user_id
+      |> list_available_dates()
+      |> Enum.reduce([], fn day, acc ->
+        streaks = get_streaks_from_slot_ids(day.date, day.selected_slots)
+        acc ++ streaks
+      end)
+
     user_id
     |> Schedules.list_todos()
-    |> Schedules.auto_assign()
+    |> Schedules.auto_assign(streaks)
+    |> case do
+      {:ok, results} ->
+        keys = Map.keys(results)
 
-    Schedules.list_todos(user_id)
+        Enum.reduce(keys, [], fn key, acc ->
+          [Map.fetch!(results, key) | acc]
+        end)
+    end
+  end
+
+  defp get_streaks_from_slot_ids(date, slot_ids) do
+    ndt = DateTime.to_naive(date)
+    midnight = Time.new!(0, 0, 0, 0)
+
+    # TODO: Refactor
+    Enum.reduce(slot_ids, {hd(slot_ids), []}, fn
+      id, {_prev_id, []} ->
+        offset = trunc((id * 0.5) * 1800)
+        from_ndt =
+          midnight
+          |> Time.add(offset, :second)
+          |> update_datetime_with_time(ndt)
+
+        to_ndt = NaiveDateTime.add(from_ndt, 1800, :second)
+        {id, [%{from: from_ndt, to: to_ndt}]}
+
+      id, {prev_id, streaks} ->
+        offset = trunc((id * 0.5) * 3600)
+        from_ndt =
+          midnight
+          |> Time.add(offset, :second)
+          |> update_datetime_with_time(ndt)
+
+        to_ndt = NaiveDateTime.add(from_ndt, 1800, :second)
+
+        streaks =
+          cond do
+            id - prev_id == 1 ->
+              prev_streak = hd(streaks)
+              remaining_streaks = tl(streaks)
+
+              [%{prev_streak | to: to_ndt} | remaining_streaks]
+
+            id - prev_id > 1 ->
+              [%{from: from_ndt, to: to_ndt} | streaks]
+          end
+
+        {id, streaks}
+    end)
+    |> fn {_, streaks} ->
+      Enum.map(streaks, fn %{from: from, to: to} ->
+        {from, to}
+      end)
+    end.()
   end
 
   defp list_todos(user_id) do
     Schedules.list_todos(user_id)
   end
 
+  defp update_datetime_with_time(time, datetime) do
+    %{hour: hour, minute: minute} = time
+    %{datetime | hour: hour, minute: minute}
+  end
+
   def list_week do
     Enum.reduce(0..6, [], fn offset, week ->
       day =
-        DateTime.utc_now()
+        Timex.today()
         |> Timex.beginning_of_week(:sun)
         |> Timex.shift(days: offset)
 
@@ -191,8 +260,11 @@ defmodule ButlerWeb.TodoLive.Index do
   end
 
   defp group_todos_by_day(todos) when is_list(todos) do
-    Enum.group_by(todos, fn todo ->
-      Timex.to_date(todo.start)
+    Enum.group_by(todos, fn
+      %{start: nil} ->
+        nil
+      %{start: start} ->
+        DateTime.to_date(start)
     end)
   end
 
@@ -212,7 +284,8 @@ defmodule ButlerWeb.TodoLive.Index do
   defp get_slots_from_date(dates, date) when is_list(dates) do
     dates
     |> Enum.find(fn d ->
-      DateTime.compare(d.date, date) == :eq
+      d_date = DateTime.to_date(d.date)
+      Date.compare(d_date, date) == :eq
     end)
     |> case do
       nil -> []

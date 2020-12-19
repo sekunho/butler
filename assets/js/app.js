@@ -22,6 +22,7 @@ let selectedSlots = {}
 let Hooks = {}
 Hooks.TimeSlots = {
     mounted() {
+        console.log("mounted")
         const className = "events__time-slot"
         let slots = document.getElementsByClassName(className)
         let isDown = false
@@ -36,6 +37,7 @@ Hooks.TimeSlots = {
             }
 
             slots[x].addEventListener("mousedown", (e) => {
+                console.log("click")
                 toggleSlot(e.target)
 
                 isDown = true
