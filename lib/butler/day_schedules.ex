@@ -84,7 +84,7 @@ defmodule Butler.DaySchedules do
     |> Enum.reduce(Multi.new(), fn
       {date, index}, multi ->
         date_cs = change_day(%Day{}, date)
-        selected_slots = Ecto.Changeset.get_change(date_cs, :selected_slots)
+        selected_slots = Ecto.Changeset.get_change(date_cs, :selected_slots, [])
 
         # If date already exists then only `selected_slots` has to be updated.
         date_on_conflict = {:on_conflict, [set: [selected_slots: selected_slots]]}

@@ -178,15 +178,14 @@ defmodule Butler.Schedules do
     |> multi_update()
   end
 
-  defp multi_update(todos_with_changes) do
-    # Updates the list of todos based on what the scheduler generates.
+  def multi_update(todos_with_changes) do
     multi = Multi.new()
 
     todos_with_changes
     |> Enum.reduce(multi, fn {todo, attrs}, m_acc ->
-      changeset = Butler.Schedules.change_todo(todo, attrs)
+      changeset = change_todo(todo, attrs)
       Multi.update(m_acc, todo.id, changeset)
     end)
-    |> Butler.Repo.transaction()
+    |> Repo.transaction()
   end
 end
