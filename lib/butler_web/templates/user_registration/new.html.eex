@@ -22,10 +22,12 @@
           <label for="email-address" class="sr-only">Email address</label>
           <%= label f, :email, class: "sr-only" %>
           <%= email_input f, :email, required: true, placeholder: "Email address", class: "appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" %>
+          <%= error_tag f, :email %>
         </div>
         <div>
           <%= label f, :password, class: "sr-only" %>
           <%= password_input f, :password, required: true, placeholder: "Password", class: "appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" %>
+          <%= error_tag f, :password %>
         </div>
       </div>
 
