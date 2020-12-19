@@ -1,4 +1,4 @@
-FROM boreddevco/alpine-elixir-phoenix:1.11.1 AS phx-builder
+FROM boreddevco/alpine-elixir-phoenix:1.11.2 AS phx-builder
 
 # TODO: Use Ubuntu image instead
 
@@ -40,7 +40,7 @@ RUN cd assets/ && \
     mix do compile, phx.digest && \
     mix release --overwrite
 
-FROM bitwalker/alpine-elixir:latest
+FROM elixir:1.11.2-alpine
 
 # RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/testing/" >> /etc/apk/repositories
 # # Install `matrex` dependencies.
