@@ -173,7 +173,7 @@ defmodule Butler.Schedules do
     soln.genes
     |> Matrex.to_list_of_lists()
     |> Core.Timetable.from_bit_timetable()
-    |> Core.Timetable.sort_todos(todos)
+    |> sort_todos(todos)
     |> Core.Timetable.from_schedule(todos, time_streaks, true)
     |> multi_update()
   end
@@ -187,5 +187,28 @@ defmodule Butler.Schedules do
       Multi.update(m_acc, todo.id, changeset)
     end)
     |> Repo.transaction()
+  end
+
+  defp sort_todos(timetable, todos) do
+    Enum.map(timetable, fn streak ->
+      Enum.sort_by(
+        streak,
+        fn todo_id ->
+          %{priority: p, duration: _d} = Core.Todo.get_todo(todos, trunc(todo_id - 1))
+
+          p_val =
+            case p do
+              :none -> 1
+              :low -> 2
+              :medium -> 3
+              :high -> 4
+            end
+
+          # :math.pow(p_val, d / 60)
+          p_val
+        end,
+        :desc
+      )
+    end)
   end
 end
