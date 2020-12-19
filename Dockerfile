@@ -41,7 +41,7 @@ RUN cd assets/ && \
     mix do compile, phx.digest && \
     mix release --overwrite
 
-FROM elixir:1.11.2-alpine
+FROM boreddevco/alpine-elixir:1.11.2
 
 EXPOSE 4000
 ENV PORT=4000 MIX_ENV=prod
