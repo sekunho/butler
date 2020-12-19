@@ -153,10 +153,13 @@ defmodule ButlerWeb.TodoLive.Index do
       end
 
     todos = run_scheduler(socket.assigns.current_user.id)
+
     # Have to provide some visual feedback that the changes were saved.
+    IO.inspect(params, label: "NEW SLOTS")
     {:noreply,
       socket
       |> assign(:todos, todos)
+      |> assign(:dates, dates)
       |> push_event("refresh_local_slots", params)}
   end
 
@@ -183,63 +186,89 @@ defmodule ButlerWeb.TodoLive.Index do
         acc ++ streaks
       end)
 
-    user_id
-    |> Schedules.list_todos()
-    |> Schedules.auto_assign(streaks)
-    |> case do
-      {:ok, results} ->
-        keys = Map.keys(results)
+    todos = Schedules.list_todos(user_id)
 
-        Enum.reduce(keys, [], fn key, acc ->
-          [Map.fetch!(results, key) | acc]
+    # TODO: Refactor
+    # This one is really bad. I have to find a way to condense it to fewer db ops.
+    cond do
+      todos != [] and streaks != [] ->
+        # Remove the old schedule of todos that were scheduled to a time slot.
+        todos
+        |> Enum.filter(fn t -> t.start != nil end)
+        |> Enum.map(fn todo ->
+          {todo, %{start: nil}}
         end)
+        |> Schedules.multi_update()
+
+        user_id
+        |> Schedules.list_todos()
+        |> Schedules.auto_assign(streaks)
+
+      todos != [] and streaks == [] ->
+        # Remove the old schedule of todos that were scheduled to a time slot.
+        todos
+        |> Enum.filter(fn t -> t.start != nil end)
+        |> Enum.map(fn todo ->
+          {todo, %{start: nil}}
+        end)
+        |> Schedules.multi_update()
+
+      true -> todos
     end
+    |> IO.inspect(label: "POST-SCHEDULER")
+
+    Schedules.list_todos(user_id)
   end
 
   defp get_streaks_from_slot_ids(date, slot_ids) do
     ndt = DateTime.to_naive(date)
     midnight = Time.new!(0, 0, 0, 0)
 
-    # TODO: Refactor
-    Enum.reduce(slot_ids, {hd(slot_ids), []}, fn
-      id, {_prev_id, []} ->
-        offset = trunc((id * 0.5) * 1800)
-        from_ndt =
-          midnight
-          |> Time.add(offset, :second)
-          |> update_datetime_with_time(ndt)
+    case slot_ids do
+      [] -> []
 
-        to_ndt = NaiveDateTime.add(from_ndt, 1800, :second)
-        {id, [%{from: from_ndt, to: to_ndt}]}
+      [first_id | _] ->
+        # TODO: Refactor
+        Enum.reduce(slot_ids, {first_id, []}, fn
+          id, {_prev_id, []} ->
+            offset = trunc((id * 0.5) * 1800)
+            from_ndt =
+              midnight
+              |> Time.add(offset, :second)
+              |> update_datetime_with_time(ndt)
 
-      id, {prev_id, streaks} ->
-        offset = trunc((id * 0.5) * 3600)
-        from_ndt =
-          midnight
-          |> Time.add(offset, :second)
-          |> update_datetime_with_time(ndt)
+            to_ndt = NaiveDateTime.add(from_ndt, 1800, :second)
+            {id, [%{from: from_ndt, to: to_ndt}]}
 
-        to_ndt = NaiveDateTime.add(from_ndt, 1800, :second)
+          id, {prev_id, streaks} ->
+            offset = trunc((id * 0.5) * 3600)
+            from_ndt =
+              midnight
+              |> Time.add(offset, :second)
+              |> update_datetime_with_time(ndt)
 
-        streaks =
-          cond do
-            id - prev_id == 1 ->
-              prev_streak = hd(streaks)
-              remaining_streaks = tl(streaks)
+            to_ndt = NaiveDateTime.add(from_ndt, 1800, :second)
 
-              [%{prev_streak | to: to_ndt} | remaining_streaks]
+            streaks =
+              cond do
+                id - prev_id == 1 ->
+                  prev_streak = hd(streaks)
+                  remaining_streaks = tl(streaks)
 
-            id - prev_id > 1 ->
-              [%{from: from_ndt, to: to_ndt} | streaks]
-          end
+                  [%{prev_streak | to: to_ndt} | remaining_streaks]
 
-        {id, streaks}
-    end)
-    |> fn {_, streaks} ->
-      Enum.map(streaks, fn %{from: from, to: to} ->
-        {from, to}
-      end)
-    end.()
+                id - prev_id > 1 ->
+                  [%{from: from_ndt, to: to_ndt} | streaks]
+              end
+
+            {id, streaks}
+        end)
+        |> fn {_, streaks} ->
+          Enum.map(streaks, fn %{from: from, to: to} ->
+            {from, to}
+          end)
+        end.()
+    end
   end
 
   defp list_todos(user_id) do
@@ -286,14 +315,19 @@ defmodule ButlerWeb.TodoLive.Index do
   end
 
   defp get_slots_from_date(dates, date) when is_list(dates) do
+    IO.inspect(date, label: "date")
     dates
     |> Enum.find(fn d ->
       d_date = DateTime.to_date(d.date)
       Date.compare(d_date, date) == :eq
     end)
+    |> IO.inspect(label: "BETWN")
     |> case do
-      nil -> []
-      date -> Map.get(date, :selected_slots, [])
+      nil ->
+        []
+
+      date ->
+        Map.get(date, :selected_slots, [])
     end
   end
 end
