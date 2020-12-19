@@ -18,14 +18,14 @@ import NProgress from "nprogress"
 import { LiveSocket } from "phoenix_live_view"
 
 let selectedSlots = {}
+let isDown = false
+const className = "events__time-slot"
 
 let Hooks = {}
 Hooks.TimeSlots = {
     mounted() {
-        console.log("mounted")
-        const className = "events__time-slot"
         let slots = document.getElementsByClassName(className)
-        let isDown = false
+        isDown = false
 
         for (let x = 0; x < slots.length; x++) {
             const slotDate = slots[x].getAttribute("phx-value-day")
@@ -36,37 +36,32 @@ Hooks.TimeSlots = {
                 updateDaySlots(slotDate, slotId)
             }
 
-            slots[x].addEventListener("mousedown", (e) => {
-                console.log("click")
-                toggleSlot(e.target)
-
-                isDown = true
-            })
-
-            slots[x].addEventListener("mouseenter", (e) => {
-                if (isDown) {
-                    const elem = e.target.closest(`.${className}`);
-
-                    if (elem) {
-                        toggleSlot(elem)
-                    }
-                }
-            }, false)
-
-            document.addEventListener("mouseup", (e) => {
-                if (isDown) {
-                    isDown = false
-
-                    // Send list of selected slots to the server
-                    this.pushEvent("update_time_slots", { "selected_slots": selectedSlots })
-                }
-            })
+            slots[x].addEventListener("mousedown", onMouseDown)
+            slots[x].addEventListener("mouseenter", onMouseEnter, false)
         }
+
+        document.addEventListener("mouseup", onMouseUp.bind(this))
 
         // Update local copy of selected slots.
         this.handleEvent("refresh_local_slots", ({ selected_slots }) => {
             selectedSlots = selected_slots
         })
+    },
+
+    beforeDestroy() {
+        // Listeners have to be remove because they will be added once the hook
+        // gets mounted again. It will not be able to tell if it already has an
+        // existing listener, or at least I currently don't know. Had to get this
+        // done ASAP. So maybe I'll leave a todo to investigate?
+        // TODO: Check if there is a better way than this.
+        let slots = document.getElementsByClassName(className)
+
+        for (let x = 0; x < slots.length; x++) {
+            slots[x].removeEventListener("mousedown", onMouseDown)
+            slots[x].removeEventListener("mouseenter", onMouseEnter, false)
+        }
+
+        document.removeEventListener("mouseup", onMouseUp)
     }
 }
 
@@ -114,9 +109,37 @@ function toggleSlot(slotEl) {
 
 // Update local copy of selected slots.
 function updateDaySlots(date, slotId) {
-    if (date in selectedSlots) {
+    if (date in selectedSlots && !selectedSlots[date].includes(slotId)) {
         selectedSlots[date].push(slotId)
     } else {
         selectedSlots[date] = [slotId]
+    }
+}
+
+// Listener functions
+const onMouseDown = (e) => {
+    if (!isDown) {
+        toggleSlot(e.target)
+    }
+
+    isDown = true
+}
+
+const onMouseEnter = (e) => {
+    if (isDown) {
+        const elem = e.target.closest(`.${className}`);
+
+        if (elem) {
+            toggleSlot(elem)
+        }
+    }
+}
+
+function onMouseUp() {
+    if (isDown) {
+        isDown = false
+
+        // Send list of selected slots to the server
+        this.pushEvent("update_time_slots", { "selected_slots": selectedSlots })
     }
 }

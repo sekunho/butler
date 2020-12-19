@@ -153,10 +153,13 @@ defmodule ButlerWeb.TodoLive.Index do
       end
 
     todos = run_scheduler(socket.assigns.current_user.id)
+
     # Have to provide some visual feedback that the changes were saved.
+    IO.inspect(params, label: "NEW SLOTS")
     {:noreply,
       socket
       |> assign(:todos, todos)
+      |> assign(:dates, dates)
       |> push_event("refresh_local_slots", params)}
   end
 
@@ -185,29 +188,36 @@ defmodule ButlerWeb.TodoLive.Index do
 
     todos = Schedules.list_todos(user_id)
 
+    # TODO: Refactor
+    # This one is really bad. I have to find a way to condense it to fewer db ops.
     cond do
       todos != [] and streaks != [] ->
-        Schedules.auto_assign(todos, streaks)
-        |> case do
-          {:ok, results} ->
-            keys = Map.keys(results)
+        # Remove the old schedule of todos that were scheduled to a time slot.
+        todos
+        |> Enum.filter(fn t -> t.start != nil end)
+        |> Enum.map(fn todo ->
+          {todo, %{start: nil}}
+        end)
+        |> Schedules.multi_update()
 
-            Enum.reduce(keys, [], fn key, acc ->
-              [Map.fetch!(results, key) | acc]
-            end)
-        end
+        user_id
+        |> Schedules.list_todos()
+        |> Schedules.auto_assign(streaks)
 
       todos != [] and streaks == [] ->
         # Remove the old schedule of todos that were scheduled to a time slot.
         todos
         |> Enum.filter(fn t -> t.start != nil end)
         |> Enum.map(fn todo ->
-          Schedules.change_todo(todo, %{start: nil})
+          {todo, %{start: nil}}
         end)
         |> Schedules.multi_update()
 
       true -> todos
     end
+    |> IO.inspect(label: "POST-SCHEDULER")
+
+    Schedules.list_todos(user_id)
   end
 
   defp get_streaks_from_slot_ids(date, slot_ids) do
