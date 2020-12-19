@@ -98,6 +98,23 @@ defmodule Butler.DaySchedules do
     # Upsert time slot
   end
 
+  def from_unparse_days(unparsed_slots) when is_list(unparsed_slots) do
+    # Group slots according to common date
+    Enum.reduce(unparsed_slots, %{}, fn
+      %{"day" => date, "index" => index_str}, acc ->
+        index = String.to_integer(index_str)
+
+        {:ok, date} =
+          [date, "T", "00:00:00+00:00"]
+          |> IO.iodata_to_binary()
+          |> Timex.parse("{ISO:Extended}")
+
+        Map.update(acc, date, [index], fn slots ->
+          [index | slots]
+        end )
+    end)
+  end
+
   @doc """
   Updates a day.
 

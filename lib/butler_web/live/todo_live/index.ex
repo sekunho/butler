@@ -98,20 +98,20 @@ defmodule ButlerWeb.TodoLive.Index do
 
     # TODO: Store time slots as streaks of time in database.
     ## Consider the cases, shrinking both ends, and breaking a time slot
-    grouped_streaks = TimeStreaks.from_unparsed_slots(slots)
+    grouped_slots = DaySchedules.from_unparse_days(slots)
 
-    IO.inspect(grouped_streaks)
+    IO.inspect(grouped_slots)
 
     # TODO: Sort slot indices
     dates =
-      grouped_streaks
+      grouped_slots
       |> Map.keys()
       |> Enum.map(fn date ->
         # The reason the timestamps are manually specified is because Multi
         # is pretty low-level, and does not seem to set those automatically.
         # Without this, this will complain about a null constraint violation.
         time = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
-        date_slots = Map.get(grouped_streaks, date, [])
+        date_slots = Map.get(grouped_slots, date, [])
         date_attrs =
           %{
             date: date,
