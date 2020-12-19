@@ -52,6 +52,7 @@ defmodule ButlerWeb.TodoLive.Index do
   end
 
   defp apply_action(socket, :new, _params) do
+    IO.puts "in new"
     socket
     |> assign(:page_title, "New Todo")
     |> assign(:todo, %Todo{})
