@@ -46,7 +46,6 @@ defmodule ButlerWeb.TodoLive.FormComponent do
       {:noreply,
         socket
         |> put_flash(:info, "Todo created successfully")
-        |> assign(:changeset, Schedules.change_todo(%Todo{}, %{}))
         |> push_redirect(to: Routes.todo_index_path(socket, :index))}
     else
       {:error, %Ecto.Changeset{} = changeset} ->
