@@ -22,7 +22,8 @@ let selectedSlots = []
 let Hooks = {}
 Hooks.TimeSlots = {
     mounted() {
-        let slots = document.getElementsByClassName('time-slot')
+        const className = "events__time-slot"
+        let slots = document.getElementsByClassName(className)
         let isDown = false
 
         for (let x = 0; x < slots.length; x++) {
@@ -34,7 +35,7 @@ Hooks.TimeSlots = {
 
             slots[x].addEventListener("mouseenter", (e) => {
                 if (isDown) {
-                    const elem = e.target.closest(".time-slot");
+                    const elem = e.target.closest(`.${className}`);
 
                     if (elem) {
                         toggleSlot(elem, selectedSlots)

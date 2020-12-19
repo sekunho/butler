@@ -2,9 +2,7 @@ defmodule ButlerWeb.TodoLive.Index do
   use ButlerWeb, :live_view
 
   alias Butler.DaySchedules
-  alias Butler.DaySchedules.Day
   alias Butler.Schedules
-  alias Butler.TimeStreaks
   alias Butler.Schedules.Todo
   alias ButlerWeb.DayComponent
   alias Butler.Accounts.User
@@ -31,7 +29,8 @@ defmodule ButlerWeb.TodoLive.Index do
         socket =
           socket
           |> assign(:todos, list_todos(user_id))
-          |> assign(:mode, :visual)
+          |> assign(:dates, list_available_dates(user_id))
+          |> assign(:mode, :select)
 
         {:ok, socket, temporary_assigns: []}
     end
@@ -93,14 +92,7 @@ defmodule ButlerWeb.TodoLive.Index do
   @impl true
   def handle_event("update_time_slots", %{"selected_slots" => slots} = params, socket) do
     current_user = socket.assigns.current_user
-
-    IO.inspect(slots, label: "selected slots")
-
-    # TODO: Store time slots as streaks of time in database.
-    ## Consider the cases, shrinking both ends, and breaking a time slot
     grouped_slots = DaySchedules.from_unparse_days(slots)
-
-    IO.inspect(grouped_slots)
 
     # TODO: Sort slot indices
     dates =
@@ -112,18 +104,15 @@ defmodule ButlerWeb.TodoLive.Index do
         # Without this, this will complain about a null constraint violation.
         time = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
         date_slots = Map.get(grouped_slots, date, [])
-        date_attrs =
-          %{
-            date: date,
-            user_id: current_user.id,
-            inserted_at: time,
-            updated_at: time,
-            selected_slots: date_slots
-          }
 
-        DaySchedules.change_day(%Day{}, date_attrs)
+        %{
+          date: date,
+          user_id: current_user.id,
+          inserted_at: time,
+          updated_at: time,
+          selected_slots: date_slots
+        }
       end)
-      |> IO.inspect()
 
     # # Creates the days, and slots in those days.
     Butler.DaySchedules.create_days_with_slots(dates)
@@ -161,7 +150,7 @@ defmodule ButlerWeb.TodoLive.Index do
   def list_week do
     Enum.reduce(0..6, [], fn offset, week ->
       day =
-        Timex.today()
+        DateTime.utc_now()
         |> Timex.beginning_of_week(:sun)
         |> Timex.shift(days: offset)
 
@@ -176,29 +165,27 @@ defmodule ButlerWeb.TodoLive.Index do
     end)
   end
 
-  defp group_available_by_day(avail_slots) when is_list(avail_slots) do
-    Enum.group_by(avail_slots, fn {start, _} ->
-      Timex.to_date(start)
-    end)
-  end
-
   defp get_priority(priority) do
     priority
     |> Atom.to_string()
     |> String.capitalize()
   end
 
-  # TODO: Remove when user-defined available slots are implemented.
-  defp sample_streaks do
-    [{~N[2020-12-15 09:00:00.00], ~N[2020-12-15 12:00:00.00]},
-      {~N[2020-12-15 13:00:00.00], ~N[2020-12-15 20:00:00.00]},
-      {~N[2020-12-16 09:00:00.00], ~N[2020-12-16 12:00:00.00]},
-      {~N[2020-12-16 13:00:00.00], ~N[2020-12-16 20:00:00.00]},
-      {~N[2020-12-17 09:00:00.00], ~N[2020-12-17 12:00:00.00]},
-      {~N[2020-12-17 13:00:00.00], ~N[2020-12-17 15:00:00.00]},
-      {~N[2020-12-18 09:00:00.00], ~N[2020-12-18 12:00:00.00]},
-      {~N[2020-12-18 13:00:00.00], ~N[2020-12-18 20:00:00.00]},
-      {~N[2020-12-19 09:00:00.00], ~N[2020-12-19 12:00:00.00]},
-      {~N[2020-12-19 13:00:00.00], ~N[2020-12-19 20:00:00.00]}]
+  defp list_available_dates(user_id) do
+    from = Timex.beginning_of_week(DateTime.utc_now(), :sun)
+    to = Timex.shift(from, days: 6)
+
+    DaySchedules.list_days(user_id, from, to)
+  end
+
+  defp get_slots_from_date(dates, date) when is_list(dates) do
+    dates
+    |> Enum.find(fn d ->
+      DateTime.compare(d.date, date) == :eq
+    end)
+    |> case do
+      nil -> []
+      date -> Map.get(date, :selected_slots, [])
+    end
   end
 end

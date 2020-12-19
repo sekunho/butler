@@ -10,7 +10,7 @@ defmodule ButlerWeb.DayComponent do
                 <%= get_day_num(@date) %>
             </span>
         </div>
-        <ul class="relative mt-8">
+        <ul class="events relative mt-8">
             <%= if is_disabled?(@date) do %><!--
                 <li class="absolute w-full bg-red-300 opacity-20 z-10 cursor-not-allowed select-none text-white"
                     style="height: calc(3.25rem * 24);">
@@ -21,12 +21,7 @@ defmodule ButlerWeb.DayComponent do
                 <li class="w-full h-0.5 bg-red-600 absolute z-10" style="margin-top: calc(3.25rem * <%= get_time_offset(Timex.now()) %>);"></li>
             <% end %>
 
-            <%= if @mode == :select do %>
-                <%= for {from, to} <- @slots do %>
-                    <li class="absolute w-full bg-green-200 opacity-20"
-                        style="margin-top: calc(3.25rem * <%= get_time_offset(from) %>); height: calc(3.25rem * <%= get_slot_length(from, to) %>);">
-                    </li>
-                <% end %>
+            <%= if @mode == :visual do %>
                 <%= for todo <- @todos do %>
                     <li class="border border-indigo-600 absolute w-full bg-indigo-500 px-1 rounded cursor-pointer select-none hover:bg-indigo-600 text-white"
                         style="height: calc(3.25rem * <%= todo.duration / 60 %>); margin-top: calc(3.25rem * <%= get_time_offset(todo.start) %>);">
@@ -38,7 +33,11 @@ defmodule ButlerWeb.DayComponent do
                 <% end %>
             <% else %>
                 <%= for offset <- 0..47 do %>
-                    <li class="time-slot absolute w-full border-b" draggable="false" phx-value-id="<%= offset %>" phx-value-day="<%= @date %>" phx-value-slot="<%= offset_time(offset * 0.5) %>"
+                    <li class="events__time-slot <%= get_slot_class(@slots, offset) %>"
+                      draggable="false"
+                      phx-value-id="<%= offset %>"
+                      phx-value-day="<%= @date %>"
+                      phx-value-slot="<%= offset_time(offset * 0.5) %>"
                         style="margin-top: calc(3.25rem * <%= 0.5 * offset %>); height: calc(3.25rem * 0.5);">
                     </li>
                 <% end %>
@@ -68,11 +67,19 @@ defmodule ButlerWeb.DayComponent do
 
   defp get_day_name(date), do: Date.day_of_week(date) |> Timex.day_shortname()
 
-  defp get_day_num(%Date{day: day}), do: day
+  defp get_day_num(%{day: day}), do: day
 
-  defp is_today?(%Date{} = date), do: date == Timex.today()
+  defp is_today?(date), do: date == DateTime.utc_now()
 
-  defp is_disabled?(%Date{} = date), do: Timex.before?(date, Timex.today())
+  defp is_disabled?(date), do: Timex.before?(date, DateTime.utc_now())
+
+  defp get_slot_class(slots, index) when is_list(slots) and is_integer(index) do
+    case Enum.member?(slots, index) do
+      true -> "events__time-slot--active"
+
+      false -> ""
+    end
+  end
 
   defp get_slot_length(from, to) do
     from_t = NaiveDateTime.to_time(from)

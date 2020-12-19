@@ -18,8 +18,13 @@ defmodule Butler.DaySchedules do
       [%Day{}, ...]
 
   """
-  def list_days do
-    Repo.all(Day)
+  def list_days(user_id, from_date, to_date) do
+    query =
+      from d in Day,
+      where: d.date >= ^from_date and d.date <= ^to_date,
+      where: d.user_id == ^user_id
+
+    Repo.all(query)
   end
 
   @doc """
@@ -56,46 +61,38 @@ defmodule Butler.DaySchedules do
     |> Repo.insert(on_conflict: :nothing, returning: true)
   end
 
+  @doc """
+  Creates a list of day with slots.
+
+  ## Examples
+
+      iex> create_day([])
+      {:ok, %Day{}}
+
+      iex> create_day(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
   def create_days_with_slots(dates) when is_list(dates) do
     opts = [
-      on_conflict: [set: [updated_at: Timex.now()]],
       returning: true,
       conflict_target: [:user_id, :date]
     ]
 
-    # Enum.reduce(dates, Multi.new(), fn date, multi ->
-    #   Multi.insert()
-    # end)
-    # |> Multi.insert_all(:days, Day, dates, opts)
-    # |> IO.inspect(label: "AFTER INSERT")
-    # |> Multi.run(:streaks, fn _repo, %{days: {_len, days}} ->
-    #   Enum.reduce(days, Multi.new(), fn %{id: id, date: date}, multi ->
-    #     case Map.get(grouped_slots, date) do
-    #       nil -> []
+    dates
+    |> Enum.with_index()
+    |> Enum.reduce(Multi.new(), fn
+      {date, index}, multi ->
+        date_cs = change_day(%Day{}, date)
+        selected_slots = Ecto.Changeset.get_change(date_cs, :selected_slots)
 
-    #       streaks ->
-    #         # The reason the timestamps are manually specified is because Multi
-    #         # is pretty low-level, and does not seem to set those automatically.
-    #         # Without this, this will complain about a null constraint violation.
-    #         time = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+        # If date already exists then only `selected_slots` has to be updated.
+        date_on_conflict = {:on_conflict, [set: [selected_slots: selected_slots]]}
+        date_opts = [ date_on_conflict | opts]
 
-    #         Enum.reduce(streaks, multi, fn streak, multi ->
-    #           new_streak =
-    #             streak
-    #             |> Map.put(:inserted_at, time)
-    #             |> Map.put(:updated_at, time)
-    #             |> Map.put(:day_id, id)
-
-    #             Multi.insert(multi, Time.to_string(streak.from), new_streak)
-    #         end)
-    #     end
-    #   end)
-    # end)
-    # |> IO.inspect(label: "AFTER MERGE")
-    # |> Repo.transaction()
-    # |> IO.inspect(label: "After transaction")
-    # Upsert day (without the updating)
-    # Upsert time slot
+        Multi.insert(multi, index, date_cs, date_opts)
+    end)
+    |> Repo.transaction()
   end
 
   def from_unparse_days(unparsed_slots) when is_list(unparsed_slots) do
