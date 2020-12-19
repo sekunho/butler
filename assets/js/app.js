@@ -22,6 +22,13 @@ let isDown = false
 const className = "events__time-slot"
 
 let Hooks = {}
+
+Hooks.FocusNameField = {
+    mounted() {
+        this.el.focus()
+    }
+}
+
 Hooks.MobileMenu = {
     mounted() {
         let menuBtn = document.getElementById("mobile-menu")
