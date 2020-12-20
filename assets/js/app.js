@@ -138,6 +138,8 @@ function updateDaySlots(date, slotId) {
 
 // Listener functions
 const onMouseDown = (e) => {
+    debounceFn?.cancel()
+
     if (!isDown) {
         toggleSlot(e.target)
     }
