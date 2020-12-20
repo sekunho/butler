@@ -13,6 +13,7 @@
         <div class="mt-2">
             <%= f = form_for @changeset, "#",
                 id: "todo-form",
+                class: "new-todo-form",
                 phx_target: @myself,
                 phx_change: "validate_todo",
                 phx_submit: "save_todo" %>
@@ -20,7 +21,7 @@
                     <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                         <div class="sm:col-span-6">
                             <div class="mt-1 flex rounded-md shadow-sm">
-                                <%= text_input f, :name, phx_hook: "FocusNameField", placeholder: "What do you want to do?", id: "todo-name-input", class: "flex-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full min-w-0 rounded-md sm:text-sm border-gray-300" %>
+                                <%= text_input f, :name, phx_hook: "FocusNameField", placeholder: "What do you want to do?", id: "todo-name-input", class: "new-todo-form__name-input" %>
                             </div>
                             <%= error_tag f, :name %>
                         </div>

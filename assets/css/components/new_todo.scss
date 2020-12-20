@@ -1,0 +1,10 @@
+.new-todo-form {
+    &__name-input {
+        @apply flex-1 block w-full min-w-0 rounded-md sm:text-sm border-gray-300;
+    
+        &:focus{
+            @apply ring-indigo-500 border-indigo-500;
+        }
+    }
+}
+
