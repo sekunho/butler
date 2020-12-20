@@ -36,7 +36,7 @@ defmodule ButlerWeb.TodoLive.Index do
           |> assign(:dates, avail_dates)
           |> assign(:mode, :visual)
 
-        {:ok, socket, temporary_assigns: [avail_dates: []]}
+        {:ok, socket, temporary_assigns: []}
     end
   end
 
