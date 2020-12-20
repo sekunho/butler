@@ -52,7 +52,6 @@ defmodule ButlerWeb.TodoLive.Index do
   end
 
   defp apply_action(socket, :new, _params) do
-    IO.puts "in new"
     socket
     |> assign(:page_title, "New Todo")
     |> assign(:todo, %Todo{})
@@ -120,6 +119,7 @@ defmodule ButlerWeb.TodoLive.Index do
         # is pretty low-level, and does not seem to set those automatically.
         # Without this, this will complain about a null constraint violation.
         time = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+
         date_slots =
           slots
           |> Map.get(date, [])
@@ -219,6 +219,7 @@ defmodule ButlerWeb.TodoLive.Index do
     Schedules.list_todos(user_id)
   end
 
+  @seconds_in_hour 3600
   defp get_streaks_from_slot_ids(date, slot_ids) do
     ndt = DateTime.to_naive(date)
     midnight = Time.new!(0, 0, 0, 0)
@@ -230,7 +231,7 @@ defmodule ButlerWeb.TodoLive.Index do
         # TODO: Refactor
         Enum.reduce(slot_ids, {first_id, []}, fn
           id, {_prev_id, []} ->
-            offset = trunc((id * 0.5) * 1800)
+            offset = trunc((id * 0.5) * @seconds_in_hour)
             from_ndt =
               midnight
               |> Time.add(offset, :second)
@@ -240,7 +241,7 @@ defmodule ButlerWeb.TodoLive.Index do
             {id, [%{from: from_ndt, to: to_ndt}]}
 
           id, {prev_id, streaks} ->
-            offset = trunc((id * 0.5) * 3600)
+            offset = trunc((id * 0.5) * @seconds_in_hour)
             from_ndt =
               midnight
               |> Time.add(offset, :second)
