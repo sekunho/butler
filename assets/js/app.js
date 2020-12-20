@@ -16,12 +16,13 @@ import "phoenix_html"
 import { Socket } from "phoenix"
 import NProgress from "nprogress"
 import { LiveSocket } from "phoenix_live_view"
+import _ from "lodash"
 
 let selectedSlots = {}
 let isDown = false
 const className = "events__time-slot"
-
 let Hooks = {}
+let debounceFn = null
 
 Hooks.FocusNameField = {
     mounted() {
@@ -63,6 +64,7 @@ Hooks.TimeSlots = {
         // Update local copy of selected slots.
         this.handleEvent("refresh_local_slots", ({ selected_slots }) => {
             selectedSlots = selected_slots
+            // isExecutable = true
         })
     },
 
@@ -157,7 +159,12 @@ function onMouseUp() {
     if (isDown) {
         isDown = false
 
-        // Send list of selected slots to the server
-        this.pushEvent("update_time_slots", { "selected_slots": selectedSlots })
+        debounceFn?.cancel()
+        debounceFn = _.debounce(function () {
+            // Send list of selected slots to the server
+            this.pushEvent("update_time_slots", { "selected_slots": selectedSlots })
+        }.bind(this), 1000)
+
+        debounceFn()
     }
 }
