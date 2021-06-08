@@ -1,8 +1,18 @@
 # Butler
 
+Declare your free time during the week
+
+![image](https://user-images.githubusercontent.com/20364796/121242878-95416680-c88c-11eb-97b5-3e4d4aefdc23.png)
+
+and Butler takes care of the things you have to do based on priority.
+
+![image](https://user-images.githubusercontent.com/20364796/121242910-9d99a180-c88c-11eb-8575-83487bec43b3.png)
+
 ## Get started
 
-### Production
+### Dev (WIP)
+
+### Production (WIP)
 
 ```sh
 docker build -t butler .
@@ -20,13 +30,3 @@ To start your Phoenix server:
   * Start Phoenix endpoint with `mix phx.server`
 
 Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
-
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
-
-## Learn more
-
-  * Official website: https://www.phoenixframework.org/
-  * Guides: https://hexdocs.pm/phoenix/overview.html
-  * Docs: https://hexdocs.pm/phoenix
-  * Forum: https://elixirforum.com/c/phoenix-forum
-  * Source: https://github.com/phoenixframework/phoenix
